@@ -1,31 +1,31 @@
 "use client";
 
+import Link from "next/link";
+import { paths, searchPageHref, specialtyHref } from "@/lib/routes";
 import { specialtyName } from "@/lib/search";
 import { clinicTypes, expertise } from "@/lib/taxonomy";
-import type { Lang, Query } from "@/lib/types";
+import type { Lang } from "@/lib/types";
 import { useApp } from "./AppContext";
 import { Logo } from "./Logo";
 
 const socials = ["Facebook", "LinkedIn", "Instagram", "X", "YouTube"];
-const base: Partial<Query> = { city: "", cityId: undefined, clinicType: undefined, specialtyId: undefined, mode: "in_person" };
 
-function Column({ title, all, items }: { title: string; all: string; items: { key: string; label: string; query: Partial<Query> }[] }) {
-  const { runSearch, homeHref } = useApp();
+type ColumnItem = { key: string; label: string; href: string };
+
+function Column({ title, all, items }: { title: string; all: ColumnItem; items: ColumnItem[] }) {
   return (
     <div className="footer-col">
       <h3>{title}</h3>
       <ul>
         {items.map((it) => (
           <li key={it.key}>
-            <button type="button" onClick={() => runSearch(it.query)}>
-              {it.label}
-            </button>
+            <Link href={it.href}>{it.label}</Link>
           </li>
         ))}
         <li>
-          <a href={homeHref("#directory")} className="footer-all">
-            {all}
-          </a>
+          <Link href={all.href} className="footer-all">
+            {all.label}
+          </Link>
         </li>
       </ul>
     </div>
@@ -33,25 +33,17 @@ function Column({ title, all, items }: { title: string; all: string; items: { ke
 }
 
 export function Footer() {
-  const { t, lang, setLang, dir, notify, onHome, homeHref } = useApp();
+  const { t, lang, setLang, dir, notify } = useApp();
   const f = t.footer;
   const soon = (what: string) => () => notify(t.common.soonTitle(what), t.common.soonBody);
 
-  const specialists = dir.specialties.slice(0, 8).map((s) => {
-    const label = specialtyName(s, lang);
-    return { key: s.id, label, query: { ...base, q: label, label, specialtyId: s.id } };
-  });
-  const services = expertise.slice(0, 8).map((e) => ({
-    key: e.id,
-    label: e[lang],
-    query: { ...base, q: e[lang], label: e[lang], specialtyId: e.specialtyId },
-  }));
+  const specialists = dir.specialties
+    .slice(0, 8)
+    .map((s) => ({ key: s.id, label: specialtyName(s, lang), href: specialtyHref(s.id) }));
+  const services = expertise.slice(0, 8).map((e) => ({ key: e.id, label: e[lang], href: searchPageHref({ q: e[lang] }) }));
   const institutions = Array.from(new Set(dir.clinics.map((c) => c.type)))
     .slice(0, 8)
-    .map((type) => {
-      const label = clinicTypes[type]?.[lang] ?? type;
-      return { key: type, label, query: { ...base, q: label, label, clinicType: type } };
-    });
+    .map((type) => ({ key: type, label: clinicTypes[type]?.[lang] ?? type, href: searchPageHref({ type }) }));
 
   const langs: { code: Lang; name: string }[] = [
     { code: "sq", name: "Shqip" },
@@ -63,9 +55,9 @@ export function Footer() {
       <div className="container">
         <div className="footer-top">
           <div className="footer-brand">
-            <a href={onHome ? "#top" : "/"} className="brand" aria-label={t.nav.home}>
+            <Link href={paths.home} className="brand" aria-label={t.nav.home}>
               <Logo />
-            </a>
+            </Link>
             <p>{f.tagline}</p>
             <p className="muted small">{f.about}</p>
           </div>
@@ -74,7 +66,7 @@ export function Footer() {
             <h3>{f.company}</h3>
             <ul>
               <li>
-                <a href={homeHref("#pro")}>{f.links.pros}</a>
+                <Link href={paths.pros}>{f.links.pros}</Link>
               </li>
               <li>
                 <button type="button" onClick={soon(f.links.about)}>
@@ -92,7 +84,7 @@ export function Footer() {
                 </button>
               </li>
               <li>
-                <a href={homeHref("#privacy")}>{f.links.privacy}</a>
+                <Link href="/#privacy">{f.links.privacy}</Link>
               </li>
               <li>
                 <button type="button" onClick={soon(f.links.cookies)}>
@@ -100,14 +92,22 @@ export function Footer() {
                 </button>
               </li>
               <li>
-                <a href={homeHref("#faq")}>{f.links.help}</a>
+                <Link href={paths.help}>{f.links.help}</Link>
               </li>
             </ul>
           </div>
 
-          <Column title={f.specialists} all={f.allSpecialists} items={specialists} />
-          <Column title={f.expertise} all={f.allExpertise} items={services} />
-          <Column title={f.institutions} all={f.allInstitutions} items={institutions} />
+          <Column title={f.specialists} all={{ key: "all", label: f.allSpecialists, href: paths.specialties }} items={specialists} />
+          <Column
+            title={f.expertise}
+            all={{ key: "all", label: f.allExpertise, href: `${paths.specialties}#sherbimet` }}
+            items={services}
+          />
+          <Column
+            title={f.institutions}
+            all={{ key: "all", label: f.allInstitutions, href: `${paths.specialties}#institucionet` }}
+            items={institutions}
+          />
         </div>
 
         <div className="footer-mid">

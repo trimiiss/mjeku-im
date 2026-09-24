@@ -1,53 +1,58 @@
-import { cookies } from "next/headers";
-import { AppProvider } from "@/components/AppContext";
+import { redirect } from "next/navigation";
 import { AppPromo } from "@/components/AppPromo";
 import { AvailableToday } from "@/components/AvailableToday";
-import { BookingDialog } from "@/components/BookingDialog";
 import { Directory } from "@/components/Directory";
 import { Faq } from "@/components/Faq";
 import { Features } from "@/components/Features";
-import { Footer } from "@/components/Footer";
 import { ForPractitioners } from "@/components/ForPractitioners";
-import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
-import { ManageBooking } from "@/components/ManageBooking";
+import { PageShell } from "@/components/PageShell";
 import { Security } from "@/components/Security";
 import { VideoConsult } from "@/components/VideoConsult";
 import { getDirectory } from "@/lib/directory";
 import { dayKey } from "@/lib/format";
-import { parseQuery } from "@/lib/search";
-import type { Lang } from "@/lib/types";
+import { currentLang } from "@/lib/lang";
+import { searchPageHref, specialtyHref } from "@/lib/routes";
+import { clinicTypes } from "@/lib/taxonomy";
+import type { Directory as Dir } from "@/lib/types";
 
 // Availability changes all the time, so render on every request.
 export const dynamic = "force-dynamic";
 
-export default async function Home({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  const lang: Lang = (await cookies()).get("lang")?.value === "en" ? "en" : "sq";
-  const [directory, params] = await Promise.all([getDirectory(), searchParams]);
-  const todayKey = dayKey(Date.now());
-  // Links such as /?s=dentist&c=prishtine (from a profile's breadcrumbs) open with that search applied.
-  const initialQuery = parseQuery(params, directory, lang);
+type Params = Record<string, string | string[] | undefined>;
+
+/** Search links from the earlier single-page version (/?s=dentist&c=prishtine) now have their own pages. */
+function legacyHref(params: Params, d: Dir) {
+  const get = (k: string) => {
+    const v = params[k];
+    return typeof v === "string" ? v.trim().slice(0, 80) : "";
+  };
+  const s = get("s");
+  const c = d.cities.some((x) => x.id === get("c")) ? get("c") : undefined;
+  const t = clinicTypes[get("t")] ? get("t") : undefined;
+  const q = get("q") || get("l");
+  const video = get("m") === "video";
+  if (s && d.specialties.some((x) => x.id === s)) return specialtyHref(s, video ? undefined : c, { video: video ? "1" : undefined });
+  if (c || t || q || video) return searchPageHref({ q, cityId: c, type: t, video });
+  return null;
+}
+
+export default async function Home({ searchParams }: { searchParams: Promise<Params> }) {
+  const [lang, directory, params] = await Promise.all([currentLang(), getDirectory(), searchParams]);
+  const legacy = legacyHref(params, directory);
+  if (legacy) redirect(legacy);
 
   return (
-    <AppProvider initialLang={lang} directory={directory} todayKey={todayKey} initialQuery={initialQuery}>
-      <a className="skip" href="#main">
-        {lang === "sq" ? "Kalo te përmbajtja" : "Skip to content"}
-      </a>
-      <Header />
-      <main id="main">
-        <Hero />
-        <Features />
-        <Security />
-        <VideoConsult />
-        <AvailableToday />
-        <AppPromo />
-        <ForPractitioners />
-        <Directory />
-        <Faq />
-      </main>
-      <Footer />
-      <BookingDialog />
-      <ManageBooking />
-    </AppProvider>
+    <PageShell lang={lang} directory={directory} todayKey={dayKey(Date.now())}>
+      <Hero />
+      <Features />
+      <Security />
+      <VideoConsult />
+      <AvailableToday />
+      <AppPromo />
+      <ForPractitioners />
+      <Directory />
+      <Faq />
+    </PageShell>
   );
 }

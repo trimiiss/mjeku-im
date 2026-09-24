@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { dayKey, formatPrice, formatTime, relativeDay } from "@/lib/format";
+import { pagesDicts } from "@/lib/pagesText";
 import { profileDicts } from "@/lib/profileText";
-import { cityName, displayName, initials, matches, prefixMatch, profileHref, specialtyName } from "@/lib/search";
+import { paths, profileHref, specialtyHref } from "@/lib/routes";
+import { cityName, displayName, initials, specialtyName } from "@/lib/search";
 import { languageNames } from "@/lib/taxonomy";
 import type { Practitioner, Slot } from "@/lib/types";
 import { useApp } from "./AppContext";
-import { ArrowRightIcon, CloseIcon, LanguagesIcon, PinIcon, SunIcon, VideoIcon } from "./Icons";
+import { ArrowRightIcon, LanguagesIcon, PinIcon, SunIcon, VideoIcon } from "./Icons";
 
 const PAGE = 6;
 
@@ -97,49 +99,20 @@ function DocCard({ p, slots }: { p: Practitioner; slots: Slot[] }) {
   );
 }
 
+/** Home page teaser: who has free slots soonest, with links to every specialty page and to all results. */
 export function AvailableToday() {
-  const { t, lang, dir, idx, applied, clearSearch, focusSearch } = useApp();
-  const [cat, setCat] = useState("all");
-  const [showAll, setShowAll] = useState(false);
-
-  useEffect(() => {
-    setCat("all");
-    setShowAll(false);
-  }, [applied]);
+  const { t, lang, dir, idx } = useApp();
+  const pd = pagesDicts[lang];
 
   const categories = useMemo(() => {
     const used = new Set(dir.practitioners.map((p) => p.specialty_id));
     return dir.specialties.filter((s) => used.has(s.id));
   }, [dir]);
 
-  const results = useMemo(() => {
-    const list = dir.practitioners.filter(
-      (p) => (!applied || matches(p, applied, idx)) && (cat === "all" || p.specialty_id === cat),
-    );
+  const soonest = useMemo(() => {
     const first = (p: Practitioner) => idx.slotsByPractitioner.get(p.id)?.[0]?.starts_at ?? "9999";
-    return list.sort((a, b) => first(a).localeCompare(first(b)));
-  }, [dir, idx, applied, cat]);
-
-  const visible = showAll ? results : results.slice(0, PAGE);
-
-  let summary: string | null = null;
-  if (applied) {
-    const what = applied.label || applied.q.trim() || t.available.allPractitioners;
-    const where =
-      applied.mode === "video"
-        ? t.available.byVideo
-        : applied.cityId
-          ? t.available.inCity(cityName(idx.cityById.get(applied.cityId), lang))
-          : applied.city.trim()
-            ? t.available.inCity(
-                cityName(
-                  dir.cities.find((c) => prefixMatch(applied.city, `${c.name_sq} ${c.name_en} ${c.aliases}`)),
-                  lang,
-                ) || applied.city.trim(),
-              )
-            : t.available.everywhere;
-    summary = `${t.available.results(results.length)} “${what}” ${where}`;
-  }
+    return [...dir.practitioners].sort((a, b) => first(a).localeCompare(first(b))).slice(0, PAGE);
+  }, [dir, idx]);
 
   return (
     <section className="section section--mist" id="available" aria-labelledby="available-title">
@@ -152,79 +125,31 @@ export function AvailableToday() {
             </h2>
             <p className="lede">{t.available.lede}</p>
           </div>
-          <button type="button" className="btn btn-outline" onClick={focusSearch}>
-            {t.available.another}
-          </button>
+          <Link className="btn btn-outline" href={paths.search}>
+            {pd.allDoctors}
+          </Link>
         </div>
 
-        {summary && (
-          <div className="result-bar" role="status">
-            <p>{summary}</p>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={clearSearch}>
-              <CloseIcon width={16} height={16} />
-              {t.available.clear}
-            </button>
-          </div>
-        )}
-
-        <div className="filter-row" role="group" aria-label={t.available.filterLabel}>
-          <button
-            type="button"
-            className="chip"
-            aria-pressed={cat === "all"}
-            onClick={() => {
-              setCat("all");
-              setShowAll(false);
-            }}
-          >
-            {t.available.all}
-          </button>
+        <nav className="filter-row" aria-label={t.available.filterLabel}>
           {categories.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              className="chip"
-              aria-pressed={cat === c.id}
-              onClick={() => {
-                setCat(c.id);
-                setShowAll(false);
-              }}
-            >
+            <Link key={c.id} className="chip" href={specialtyHref(c.id)}>
               {specialtyName(c, lang)}
-            </button>
+            </Link>
           ))}
+        </nav>
+
+        <ul className="doc-grid">
+          {soonest.map((p) => (
+            <DocCard key={p.id} p={p} slots={idx.slotsByPractitioner.get(p.id) ?? []} />
+          ))}
+        </ul>
+
+        <div className="more-row">
+          <Link className="btn btn-primary" href={paths.search}>
+            {pd.allDoctors}
+            <ArrowRightIcon />
+          </Link>
         </div>
-
-        {visible.length > 0 ? (
-          <ul className="doc-grid">
-            {visible.map((p) => (
-              <DocCard key={p.id} p={p} slots={idx.slotsByPractitioner.get(p.id) ?? []} />
-            ))}
-          </ul>
-        ) : (
-          <div className="empty">
-            <b>{t.available.emptyTitle}</b>
-            <p className="muted">{t.available.emptyText}</p>
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
-              onClick={() => {
-                clearSearch();
-                setCat("all");
-              }}
-            >
-              {t.available.emptyCta}
-            </button>
-          </div>
-        )}
-
-        {results.length > PAGE && (
-          <div className="more-row">
-            <button type="button" className="btn btn-outline" onClick={() => setShowAll((s) => !s)}>
-              {showAll ? t.available.showFewer : t.available.showAll(results.length)}
-            </button>
-          </div>
-        )}
       </div>
     </section>
   );

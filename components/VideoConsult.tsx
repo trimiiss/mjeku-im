@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
+import { paths } from "@/lib/routes";
 import { useApp } from "./AppContext";
 import { ArrowRightIcon, MicIcon, PhoneOffIcon, VideoIcon } from "./Icons";
 
 export function VideoConsult() {
-  const { t, runSearch } = useApp();
+  const { t } = useApp();
   const v = t.video;
 
   return (
@@ -50,20 +52,14 @@ export function VideoConsult() {
             ))}
           </ol>
           <div className="actions">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() =>
-                runSearch({ q: "", city: "", mode: "video", specialtyId: undefined, cityId: undefined, clinicType: undefined, label: undefined })
-              }
-            >
+            <Link className="btn btn-primary" href={paths.video}>
               <VideoIcon />
               {v.cta}
-            </button>
-            <a className="link" href="#faq">
+            </Link>
+            <Link className="link" href={paths.help}>
               {v.link}
               <ArrowRightIcon width={18} height={18} />
-            </a>
+            </Link>
           </div>
         </div>
       </div>

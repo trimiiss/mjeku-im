@@ -1,9 +1,10 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { dictionaries, type Dict } from "@/lib/i18n";
-import { buildIndex, queryHref, type Index } from "@/lib/search";
+import { searchHref } from "@/lib/routes";
+import { buildIndex, type Index } from "@/lib/search";
 import type { Directory, Lang, Mode, Query, Slot } from "@/lib/types";
 import { CloseIcon, InfoIcon } from "./Icons";
 
@@ -21,12 +22,9 @@ type Ctx = {
   setMode: (m: Mode) => void;
   draft: Draft;
   setDraft: (d: Partial<Draft>) => void;
-  applied: Query | null;
+  /** Opens the results for the search bar's query (a specialty page or the search page). */
   runSearch: (q?: Partial<Query>) => void;
-  clearSearch: () => void;
   notify: (title: string, body?: string) => void;
-  focusSearch: () => void;
-  registerSearchInput: (el: HTMLInputElement | null) => void;
   bookingSlot: Slot | null;
   bookingReason: string | null;
   openBooking: (slot: Slot, opts?: { reason?: string }) => void;
@@ -34,10 +32,6 @@ type Ctx = {
   manageOpen: boolean;
   setManageOpen: (open: boolean) => void;
   refresh: () => void;
-  /** True on the home page, where the in-page anchors (#faq, #pro, ...) live. */
-  onHome: boolean;
-  /** "#faq" on the home page, "/#faq" everywhere else. */
-  homeHref: (hash: string) => string;
 };
 
 const AppCtx = createContext<Ctx | null>(null);
@@ -46,13 +40,6 @@ export function useApp() {
   const ctx = useContext(AppCtx);
   if (!ctx) throw new Error("useApp must be used inside <AppProvider>");
   return ctx;
-}
-
-export function scrollToId(id: string) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
 }
 
 export function AppProvider({
@@ -69,7 +56,6 @@ export function AppProvider({
   initialQuery?: Query | null;
 }) {
   const router = useRouter();
-  const onHome = usePathname() === "/";
   const [lang, setLangState] = useState<Lang>(initialLang);
   const [mode, setMode] = useState<Mode>(initialQuery?.mode ?? "in_person");
   const [draft, setDraftState] = useState<Draft>(() =>
@@ -84,12 +70,10 @@ export function AppProvider({
         }
       : { q: "", city: "" },
   );
-  const [applied, setApplied] = useState<Query | null>(initialQuery);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [bookingSlot, setBookingSlot] = useState<Slot | null>(null);
   const [bookingReason, setBookingReason] = useState<string | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const t = dictionaries[lang];
   const idx = useMemo(() => buildIndex(directory), [directory]);
@@ -113,50 +97,12 @@ export function AppProvider({
         clinicType: q && "clinicType" in q ? q.clinicType : draft.clinicType,
         label: q && "label" in q ? q.label : draft.label,
       };
-      if (!onHome) {
-        // The results list lives on the home page.
-        router.push(queryHref(next));
-        return;
-      }
-      if (q?.mode) setMode(q.mode);
-      setDraftState({
-        q: next.q,
-        city: next.city,
-        specialtyId: next.specialtyId,
-        cityId: next.cityId,
-        clinicType: next.clinicType,
-        label: next.label,
-      });
-      setApplied(next);
-      // Keep the address shareable: /?s=dentist&c=prishtine#available
-      window.history.replaceState(null, "", queryHref(next));
-      requestAnimationFrame(() => scrollToId("available"));
+      router.push(searchHref(next, directory));
     },
-    [draft, mode, onHome, router],
+    [draft, mode, router, directory],
   );
 
-  const clearSearch = useCallback(() => {
-    setApplied(null);
-    setDraftState({ q: "", city: "" });
-    if (window.location.search) window.history.replaceState(null, "", "/");
-  }, []);
-
   const notify = useCallback((title: string, body?: string) => setNotice({ title, body, id: Date.now() }), []);
-
-  const focusSearch = useCallback(() => {
-    if (!onHome) {
-      router.push("/#top");
-      return;
-    }
-    scrollToId("top");
-    window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 250);
-  }, [onHome, router]);
-
-  const homeHref = useCallback((hash: string) => (onHome ? hash : `/${hash}`), [onHome]);
-
-  const registerSearchInput = useCallback((el: HTMLInputElement | null) => {
-    inputRef.current = el;
-  }, []);
 
   const openBooking = useCallback((slot: Slot, opts?: { reason?: string }) => {
     setBookingReason(opts?.reason ?? null);
@@ -183,12 +129,8 @@ export function AppProvider({
       setMode,
       draft,
       setDraft,
-      applied,
       runSearch,
-      clearSearch,
       notify,
-      focusSearch,
-      registerSearchInput,
       bookingSlot,
       bookingReason,
       openBooking,
@@ -196,8 +138,6 @@ export function AppProvider({
       manageOpen,
       setManageOpen,
       refresh,
-      onHome,
-      homeHref,
     }),
     [
       lang,
@@ -209,20 +149,14 @@ export function AppProvider({
       mode,
       draft,
       setDraft,
-      applied,
       runSearch,
-      clearSearch,
       notify,
-      focusSearch,
-      registerSearchInput,
       bookingSlot,
       bookingReason,
       openBooking,
       closeBooking,
       manageOpen,
       refresh,
-      onHome,
-      homeHref,
     ],
   );
 

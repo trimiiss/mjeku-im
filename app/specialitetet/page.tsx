@@ -1,0 +1,23 @@
+import type { Metadata } from "next";
+import { PageShell } from "@/components/PageShell";
+import { SpecialtiesView } from "@/components/pages/SpecialtiesView";
+import { getDirectory } from "@/lib/directory";
+import { dayKey } from "@/lib/format";
+import { currentLang } from "@/lib/lang";
+import { pagesDicts } from "@/lib/pagesText";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const sp = pagesDicts[await currentLang()].specialtiesPage;
+  return { title: `${sp.title} | Mjeku.Im`, description: sp.lede };
+}
+
+export default async function SpecialtiesPage() {
+  const [lang, directory] = await Promise.all([currentLang(), getDirectory()]);
+  return (
+    <PageShell lang={lang} directory={directory} todayKey={dayKey(Date.now())}>
+      <SpecialtiesView />
+    </PageShell>
+  );
+}

@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import { AppProvider } from "@/components/AppContext";
-import { BookingDialog } from "@/components/BookingDialog";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
-import { ManageBooking } from "@/components/ManageBooking";
+import { PageShell } from "@/components/PageShell";
 import { ProfileView } from "@/components/profile/ProfileView";
 import { getProfile } from "@/lib/directory";
 import { dayKey, localNow } from "@/lib/format";
+import { currentLang } from "@/lib/lang";
 import { bioParagraphs } from "@/lib/profileText";
 import { cityName, displayName, specialtyName } from "@/lib/search";
-import type { Lang } from "@/lib/types";
 
 // Free slots change all the time, so render on every request.
 export const dynamic = "force-dynamic";
@@ -29,10 +24,6 @@ function decodeId(id: string) {
   } catch {
     return "";
   }
-}
-
-async function currentLang(): Promise<Lang> {
-  return (await cookies()).get("lang")?.value === "en" ? "en" : "sq";
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -63,17 +54,8 @@ export default async function PractitionerPage({ params }: Props) {
 
   const now = Date.now();
   return (
-    <AppProvider initialLang={lang} directory={profile.directory} todayKey={dayKey(now)}>
-      <a className="skip" href="#main">
-        {lang === "sq" ? "Kalo te përmbajtja" : "Skip to content"}
-      </a>
-      <Header />
-      <main id="main">
-        <ProfileView practitioner={profile.practitioner} schedules={profile.schedules} clock={localNow(now)} />
-      </main>
-      <Footer />
-      <BookingDialog />
-      <ManageBooking />
-    </AppProvider>
+    <PageShell lang={lang} directory={profile.directory} todayKey={dayKey(now)}>
+      <ProfileView practitioner={profile.practitioner} schedules={profile.schedules} clock={localNow(now)} />
+    </PageShell>
   );
 }

@@ -1,5 +1,6 @@
+import { specialtyInfo } from "./profileText";
 import { clinicTypes, expertise } from "./taxonomy";
-import type { City, Clinic, Directory, Lang, Practitioner, Query, Slot, Specialty } from "./types";
+import type { City, Clinic, Directory, Lang, Practitioner, Slot, Specialty } from "./types";
 
 export function norm(s: string) {
   return s
@@ -47,9 +48,11 @@ export function buildIndex(d: Directory): Index {
       const cl = clinicById.get(p.clinic_id);
       const type = cl ? clinicTypes[cl.type] : undefined;
       const services = expertise.filter((e) => e.specialtyId === p.specialty_id).map((e) => `${e.sq} ${e.en}`);
+      const focus = specialtyInfo[p.specialty_id];
+      const areas = focus ? [...focus.focus.sq, ...focus.focus.en] : [];
       return [
         p.id,
-        [p.full_name, sp?.name_sq, sp?.name_sq_f, sp?.name_en, sp?.keywords, cl?.name, type?.sq, type?.en, ...services].join(" "),
+        [p.full_name, sp?.name_sq, sp?.name_sq_f, sp?.name_en, sp?.keywords, cl?.name, type?.sq, type?.en, ...services, ...areas].join(" "),
       ];
     }),
   );
@@ -65,27 +68,6 @@ export function specialtyName(s: Specialty | undefined, lang: Lang, gender?: Pra
 }
 
 export const cityName = (c: City | undefined, lang: Lang) => (c ? (lang === "sq" ? c.name_sq : c.name_en) : "");
-
-export function matches(p: Practitioner, q: Query, idx: Index) {
-  if (q.mode === "video" && !p.offers_video) return false;
-  if (q.specialtyId && p.specialty_id !== q.specialtyId) return false;
-
-  const clinic = idx.clinicById.get(p.clinic_id);
-  if (q.clinicType && clinic?.type !== q.clinicType) return false;
-
-  if (!q.specialtyId && !q.clinicType && q.q.trim() && !prefixMatch(q.q, idx.haystackById.get(p.id) ?? "")) {
-    return false;
-  }
-
-  if (q.mode !== "video") {
-    if (q.cityId && clinic?.city_id !== q.cityId) return false;
-    if (!q.cityId && q.city.trim()) {
-      const city = clinic ? idx.cityById.get(clinic.city_id) : undefined;
-      if (!city || !prefixMatch(q.city, `${city.name_sq} ${city.name_en} ${city.aliases}`)) return false;
-    }
-  }
-  return true;
-}
 
 export type Suggestion =
   | { kind: "specialty"; id: string; label: string }
@@ -147,50 +129,4 @@ export function initials(name: string) {
     .map((w) => w[0])
     .join("")
     .toUpperCase();
-}
-
-/** Link to a practitioner's profile page. */
-export const profileHref = (id: string) => `/mjeku/${encodeURIComponent(id)}`;
-
-/** Home page link that opens the results for a search, e.g. "/?s=dentist&c=prishtine#available". */
-export function queryHref(q: Partial<Query>) {
-  const sp = new URLSearchParams();
-  if (q.specialtyId) sp.set("s", q.specialtyId);
-  if (q.clinicType) sp.set("t", q.clinicType);
-  if (q.mode === "video") sp.set("m", "video");
-  else if (q.cityId) sp.set("c", q.cityId);
-  else if (q.city?.trim()) sp.set("city", q.city.trim());
-  if (q.label) sp.set("l", q.label);
-  else if (q.q?.trim()) sp.set("q", q.q.trim());
-  const s = sp.toString();
-  return `/${s ? `?${s}` : ""}#available`;
-}
-
-type Params = Record<string, string | string[] | undefined>;
-
-/** Reads a search from the home page URL (see queryHref). Unknown ids are ignored. */
-export function parseQuery(params: Params, d: Directory, lang: Lang): Query | null {
-  const get = (k: string) => {
-    const v = params[k];
-    const s = Array.isArray(v) ? v[0] : v;
-    return typeof s === "string" ? s.trim().slice(0, 80) : "";
-  };
-  const specialty = d.specialties.find((s) => s.id === get("s"));
-  const city = d.cities.find((c) => c.id === get("c"));
-  const clinicType = clinicTypes[get("t")] ? get("t") : undefined;
-  const mode = get("m") === "video" ? "video" : "in_person";
-  const label = get("l") || (specialty ? specialtyName(specialty, lang) : clinicType ? clinicTypes[clinicType][lang] : "");
-  const text = get("q");
-  const cityText = get("city");
-
-  if (!specialty && !city && !clinicType && !label && !text && !cityText && mode !== "video") return null;
-  return {
-    q: label || text,
-    city: city ? cityName(city, lang) : cityText,
-    mode,
-    specialtyId: specialty?.id,
-    cityId: city?.id,
-    clinicType,
-    label: label || undefined,
-  };
 }

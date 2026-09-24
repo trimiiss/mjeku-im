@@ -92,3 +92,25 @@ function offlineProfile(id: string): Profile | null {
   if (!practitioner) return null;
   return { directory, practitioner, schedules: offlineSchedules(id) };
 }
+
+/** Directory plus the first free slot of every practitioner (for availability filters and sorting). */
+export type Listing = { directory: Directory; nextFree: Record<string, string> };
+
+export async function getListing(): Promise<Listing> {
+  const sb = getSupabase();
+  const [directory, next] = await Promise.all([
+    getDirectory(),
+    sb ? sb.rpc("next_free_slots").then((r) => r, () => null) : Promise.resolve(null),
+  ]);
+
+  const nextFree: Record<string, string> = {};
+  if (directory.source === "live" && next && !next.error && Array.isArray(next.data)) {
+    for (const row of next.data as { practitioner_id: string; starts_at: string }[]) nextFree[row.practitioner_id] = row.starts_at;
+    return { directory, nextFree };
+  }
+
+  // Offline, or the function failed: look two weeks ahead in the demo data, or use the slots already loaded.
+  const source = directory.source === "offline" ? offlineDirectory({ days: PROFILE_DAYS, perDay: 1 }).slots : directory.slots;
+  for (const s of source) if (!nextFree[s.practitioner_id]) nextFree[s.practitioner_id] = s.starts_at;
+  return { directory, nextFree };
+}

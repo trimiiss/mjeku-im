@@ -1,11 +1,14 @@
 "use client";
 
+import Link from "next/link";
+import { paths } from "@/lib/routes";
 import { useApp } from "./AppContext";
 import { ArrowRightIcon, ChartDownIcon, ClockPlusIcon, HeartChatIcon, RocketIcon } from "./Icons";
 
 const icons = [ChartDownIcon, ClockPlusIcon, RocketIcon, HeartChatIcon];
 
-export function ForPractitioners() {
+/** On the home page it links to /per-mjeket; on that page (asPage) it is the page's heading block. */
+export function ForPractitioners({ asPage = false }: { asPage?: boolean }) {
   const { t, notify } = useApp();
   const p = t.pro;
 
@@ -14,9 +17,15 @@ export function ForPractitioners() {
       <div className="container pro-grid section">
         <div>
           <p className="eyebrow">{p.eyebrow}</p>
-          <h2 id="pro-title" className="h2">
-            {p.title}
-          </h2>
+          {asPage ? (
+            <h1 id="pro-title" className="h2">
+              {p.title}
+            </h1>
+          ) : (
+            <h2 id="pro-title" className="h2">
+              {p.title}
+            </h2>
+          )}
           <p className="pro-lede">{p.lede}</p>
 
           <ul className="benefits">
@@ -37,10 +46,17 @@ export function ForPractitioners() {
           </ul>
 
           <div className="actions">
-            <button type="button" className="btn btn-ink" onClick={() => notify(p.discoverSoon, p.discoverBody)}>
-              {p.discover}
-              <ArrowRightIcon />
-            </button>
+            {asPage ? (
+              <button type="button" className="btn btn-ink" onClick={() => notify(p.discoverSoon, p.discoverBody)}>
+                {p.discover}
+                <ArrowRightIcon />
+              </button>
+            ) : (
+              <Link className="btn btn-ink" href={paths.pros}>
+                {p.discover}
+                <ArrowRightIcon />
+              </Link>
+            )}
             <button type="button" className="btn btn-white" onClick={() => notify(p.demoSoon, p.demoBody)}>
               {p.demo}
             </button>

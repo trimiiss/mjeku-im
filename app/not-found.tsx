@@ -12,8 +12,8 @@ export default async function NotFound() {
       <h1>{sq ? "Kjo faqe nuk u gjet" : "Page not found"}</h1>
       <p className="muted">
         {sq
-          ? "Profili që kërkon mund të jetë hequr ose adresa nuk është e saktë."
-          : "The profile you are looking for may have been removed, or the address is not correct."}
+          ? "Faqja që kërkon mund të jetë hequr ose adresa nuk është e saktë."
+          : "The page you are looking for may have been removed, or the address is not correct."}
       </p>
       <Link href="/" className="btn btn-primary">
         {sq ? "Kthehu te kërkimi" : "Back to search"}

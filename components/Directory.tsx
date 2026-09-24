@@ -1,19 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { paths, searchPageHref, specialtyHref } from "@/lib/routes";
 import { cityName, specialtyName } from "@/lib/search";
 import { clinicTypes, expertise, popularExpertiseCities, popularSpecialtyCities } from "@/lib/taxonomy";
-import type { Query } from "@/lib/types";
 import { useApp } from "./AppContext";
 import { ChevronLeftIcon, ChevronRightIcon, PinIcon } from "./Icons";
 
-type Item = { key: string; label: string; query: Partial<Query> };
+type Item = { key: string; label: string; href: string };
 type RailItem = Item & { city: string };
 
-const base: Partial<Query> = { city: "", cityId: undefined, clinicType: undefined, specialtyId: undefined, mode: "in_person" };
-
 function Rail({ title, items }: { title: string; items: RailItem[] }) {
-  const { t, runSearch } = useApp();
+  const { t } = useApp();
   const ref = useRef<HTMLDivElement>(null);
   const nudge = (dir: number) => {
     const el = ref.current;
@@ -36,44 +35,39 @@ function Rail({ title, items }: { title: string; items: RailItem[] }) {
       </div>
       <div className="rail" ref={ref}>
         {items.map((it) => (
-          <button key={it.key} type="button" onClick={() => runSearch(it.query)}>
+          <Link key={it.key} href={it.href}>
             <b>{it.label}</b>
             <span>
               <PinIcon width={14} height={14} />
               <span className="sr-only">{t.directory.inWord} </span>
               {it.city}
             </span>
-          </button>
+          </Link>
         ))}
       </div>
     </div>
   );
 }
 
+/** "Find a practitioner near you": every specialty, service and institution type, each with its own page. */
 export function Directory() {
-  const { t, lang, dir, idx, runSearch, clearSearch, focusSearch } = useApp();
+  const { t, lang, dir, idx } = useApp();
   const [tab, setTab] = useState(0);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const tabs = useMemo(() => {
-    const specialists: Item[] = dir.specialties.map((s) => {
-      const label = specialtyName(s, lang);
-      return { key: s.id, label, query: { ...base, q: label, label, specialtyId: s.id } };
-    });
-    const services: Item[] = expertise.map((e) => ({
-      key: e.id,
-      label: e[lang],
-      query: { ...base, q: e[lang], label: e[lang], specialtyId: e.specialtyId },
-    }));
+    const specialists: Item[] = dir.specialties.map((s) => ({ key: s.id, label: specialtyName(s, lang), href: specialtyHref(s.id) }));
+    const services: Item[] = expertise.map((e) => ({ key: e.id, label: e[lang], href: searchPageHref({ q: e[lang] }) }));
     const types = Array.from(new Set(dir.clinics.map((c) => c.type)));
-    const institutions: Item[] = types.map((type) => {
-      const label = clinicTypes[type]?.[lang] ?? type;
-      return { key: type, label, query: { ...base, q: label, label, clinicType: type } };
-    });
+    const institutions: Item[] = types.map((type) => ({
+      key: type,
+      label: clinicTypes[type]?.[lang] ?? type,
+      href: searchPageHref({ type }),
+    }));
     return [
-      { id: "specialists" as const, items: specialists },
-      { id: "expertise" as const, items: services },
-      { id: "institutions" as const, items: institutions },
+      { id: "specialists" as const, items: specialists, all: paths.specialties },
+      { id: "expertise" as const, items: services, all: `${paths.specialties}#sherbimet` },
+      { id: "institutions" as const, items: institutions, all: `${paths.specialties}#institucionet` },
     ];
   }, [dir, lang]);
 
@@ -82,18 +76,13 @@ export function Directory() {
       const s = idx.specialtyById.get(sid);
       const c = idx.cityById.get(cid);
       if (!s || !c) return [];
-      const label = specialtyName(s, lang);
-      const city = cityName(c, lang);
-      return [{ key: `${sid}-${cid}`, label, city, query: { ...base, q: label, label, specialtyId: sid, cityId: cid, city } }];
+      return [{ key: `${sid}-${cid}`, label: specialtyName(s, lang), city: cityName(c, lang), href: specialtyHref(sid, cid) }];
     });
     const expertiseRail: RailItem[] = popularExpertiseCities.flatMap(([eid, cid]) => {
       const e = expertise.find((x) => x.id === eid);
       const c = idx.cityById.get(cid);
       if (!e || !c) return [];
-      const city = cityName(c, lang);
-      return [
-        { key: `${eid}-${cid}`, label: e[lang], city, query: { ...base, q: e[lang], label: e[lang], specialtyId: e.specialtyId, cityId: cid, city } },
-      ];
+      return [{ key: `${eid}-${cid}`, label: e[lang], city: cityName(c, lang), href: searchPageHref({ q: e[lang], cityId: cid }) }];
     });
     return { specialtyRail, expertiseRail };
   }, [idx, lang]);
@@ -145,23 +134,14 @@ export function Directory() {
           <ul className="dir-list">
             {current.items.map((it) => (
               <li key={it.key}>
-                <button type="button" onClick={() => runSearch(it.query)}>
-                  {it.label}
-                </button>
+                <Link href={it.href}>{it.label}</Link>
               </li>
             ))}
           </ul>
-          <button
-            type="button"
-            className="link dir-all"
-            onClick={() => {
-              clearSearch();
-              focusSearch();
-            }}
-          >
+          <Link className="link dir-all" href={current.all}>
             {t.directory.all[current.id]}
             <ChevronRightIcon width={18} height={18} />
-          </button>
+          </Link>
         </div>
 
         <div className="popular">

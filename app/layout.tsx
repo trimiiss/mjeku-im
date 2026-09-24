@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Figtree, Gabarito } from "next/font/google";
-import { cookies } from "next/headers";
 import { dictionaries } from "@/lib/i18n";
+import { currentLang } from "@/lib/lang";
 import "./globals.css";
 import "./booking.css";
 import "./profile.css";
+import "./pages.css";
 
 // next/font downloads these at build time and serves them from the site itself,
 // so visitors' browsers never contact Google (good for GDPR).
@@ -19,10 +20,6 @@ const body = Figtree({
   variable: "--font-body",
   display: "swap",
 });
-
-async function currentLang() {
-  return (await cookies()).get("lang")?.value === "en" ? "en" : "sq";
-}
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = dictionaries[await currentLang()];

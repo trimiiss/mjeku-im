@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { paths } from "@/lib/routes";
 import type { Lang } from "@/lib/types";
 import { useApp } from "./AppContext";
 import { CloseIcon, MenuIcon, SearchIcon } from "./Icons";
@@ -32,7 +35,8 @@ function LangToggle() {
 }
 
 export function Header() {
-  const { t, focusSearch, setManageOpen, onHome, homeHref } = useApp();
+  const { t, setManageOpen } = useApp();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const close = () => setMenuOpen(false);
 
@@ -41,23 +45,30 @@ export function Header() {
     setManageOpen(true);
   };
 
+  const links = [
+    { href: paths.search, label: t.nav.search, search: true },
+    { href: paths.video, label: t.nav.video },
+    { href: paths.pros, label: t.nav.pros },
+    { href: paths.help, label: t.nav.help },
+  ];
+  const current = (href: string) => (pathname === href ? "page" : undefined);
+
   return (
     <>
       <p className="demo-banner">{t.demoBanner}</p>
       <header className="site-header">
         <div className="container header-inner">
-          <a href={onHome ? "#top" : "/"} className="brand" aria-label={t.nav.home}>
+          <Link href={paths.home} className="brand" aria-label={t.nav.home}>
             <Logo />
-          </a>
+          </Link>
 
           <nav className="main-nav" aria-label="Main">
-            <button type="button" onClick={focusSearch}>
-              <SearchIcon width={17} height={17} />
-              {t.nav.search}
-            </button>
-            <a href={homeHref("#video")}>{t.nav.video}</a>
-            <a href={homeHref("#pro")}>{t.nav.pros}</a>
-            <a href={homeHref("#faq")}>{t.nav.help}</a>
+            {links.map((l) => (
+              <Link key={l.href} href={l.href} aria-current={current(l.href)}>
+                {l.search && <SearchIcon width={17} height={17} />}
+                {l.label}
+              </Link>
+            ))}
           </nav>
 
           <div className="header-actions">
@@ -81,24 +92,11 @@ export function Header() {
 
         {menuOpen && (
           <nav id="mobile-nav" className="container mobile-nav" aria-label={t.nav.menu}>
-            <button
-              type="button"
-              onClick={() => {
-                close();
-                focusSearch();
-              }}
-            >
-              {t.nav.search}
-            </button>
-            <a href={homeHref("#video")} onClick={close}>
-              {t.nav.video}
-            </a>
-            <a href={homeHref("#pro")} onClick={close}>
-              {t.nav.pros}
-            </a>
-            <a href={homeHref("#faq")} onClick={close}>
-              {t.nav.help}
-            </a>
+            {links.map((l) => (
+              <Link key={l.href} href={l.href} aria-current={current(l.href)} onClick={close}>
+                {l.label}
+              </Link>
+            ))}
             <button type="button" className="btn btn-primary" onClick={myBooking}>
               <TicketIcon />
               {t.nav.myBooking}

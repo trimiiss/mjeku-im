@@ -12,7 +12,8 @@ import {
   specialtyInfo,
   weeklyHours,
 } from "@/lib/profileText";
-import { cityName, displayName, initials, queryHref, specialtyName } from "@/lib/search";
+import { paths, specialtyHref } from "@/lib/routes";
+import { cityName, displayName, initials, specialtyName } from "@/lib/search";
 import { languageNames } from "@/lib/taxonomy";
 import type { Practitioner, Schedule } from "@/lib/types";
 import { useApp } from "../AppContext";
@@ -175,14 +176,14 @@ export function ProfileView({ practitioner: p, schedules, clock }: { practitione
           <nav className="crumbs" aria-label={pt.breadcrumb}>
             <ol>
               <li>
-                <Link href="/">{pt.home}</Link>
+                <Link href={paths.home}>{pt.home}</Link>
               </li>
               <li>
-                <Link href={queryHref({ specialtyId: p.specialty_id, label: specPlain })}>{specPlain}</Link>
+                <Link href={specialtyHref(p.specialty_id)}>{specPlain}</Link>
               </li>
               {city && (
                 <li>
-                  <Link href={queryHref({ specialtyId: p.specialty_id, cityId: city.id, label: specPlain })}>{cityLabel}</Link>
+                  <Link href={specialtyHref(p.specialty_id, city.id)}>{cityLabel}</Link>
                 </li>
               )}
               <li aria-current="page">{name}</li>
