@@ -1,26 +1,11 @@
 "use client";
 
-import { site } from "@/lib/site";
+import { useApp } from "./AppContext";
 import { ArrowRightIcon, MicIcon, PhoneOffIcon, VideoIcon } from "./Icons";
-import { useSearch } from "./SearchContext";
-
-const steps = [
-  {
-    title: "Book in a few clicks",
-    text: `Choose a video slot on ${site.fullName} or in the app, just like an in-person visit.`,
-  },
-  {
-    title: "Consult from home",
-    text: "Join from your phone or computer with a secure link. No travel and no waiting room.",
-  },
-  {
-    title: "Get reimbursed",
-    text: "Video consultations are covered by basic health insurance, the same way as a visit to the practice.",
-  },
-];
 
 export function VideoConsult() {
-  const { runSearch } = useSearch();
+  const { t, runSearch } = useApp();
+  const v = t.video;
 
   return (
     <section className="section" id="video" aria-labelledby="video-title">
@@ -29,10 +14,10 @@ export function VideoConsult() {
           <div className="call-tag">
             <span className="rec" />
             <span className="call-time">07:42</span>
-            <span className="call-who">Dr. med. Elira Gashi</span>
+            <span className="call-who">{v.callWith}</span>
           </div>
-          <div className="call-self">You</div>
-          <div className="call-avatar">EG</div>
+          <div className="call-self">{v.you}</div>
+          <div className="call-avatar">GZ</div>
           <div className="call-controls">
             <span>
               <MicIcon width={18} height={18} />
@@ -47,12 +32,12 @@ export function VideoConsult() {
         </div>
 
         <div className="stack">
-          <p className="eyebrow">Video consultations</p>
+          <p className="eyebrow">{v.eyebrow}</p>
           <h2 id="video-title" className="h2">
-            Have you thought about a video consultation?
+            {v.title}
           </h2>
           <ol className="steps">
-            {steps.map((s, i) => (
+            {v.steps.map((s, i) => (
               <li className="step" key={s.title}>
                 <span className="step-num" aria-hidden="true">
                   {i + 1}
@@ -68,13 +53,15 @@ export function VideoConsult() {
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => runSearch({ q: "", city: "", mode: "video" })}
+              onClick={() =>
+                runSearch({ q: "", city: "", mode: "video", specialtyId: undefined, cityId: undefined, clinicType: undefined, label: undefined })
+              }
             >
               <VideoIcon />
-              Book a video consultation
+              {v.cta}
             </button>
             <a className="link" href="#faq">
-              How video consultations work
+              {v.link}
               <ArrowRightIcon width={18} height={18} />
             </a>
           </div>

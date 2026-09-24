@@ -1,17 +1,30 @@
 # Mjeku.Im
 
-Book a doctor, dentist or therapist in Switzerland, in person or by video. White and baby-blue patient website built with Next.js.
+Book a doctor, dentist or therapist in Kosovo, at the clinic or by video. Albanian by default, with an English switch.
+
+Live: https://mjeku-im.vercel.app
+
+> Demo: all doctors and clinics are fictional sample data, and bookings are not real appointments. The site says so in a banner at the top.
 
 ## Stack
 
-- Next.js 16 (App Router) + React 19 + TypeScript
-- Plain CSS (`app/globals.css`), no UI framework
-- Fonts: Gabarito + Figtree via `next/font`, downloaded at build time and served from the site, so visitors never contact Google
-- No database yet: practitioners, slots and clinics are sample data in `lib/data.ts`
+- Next.js 16 (App Router) + React 19 + TypeScript, plain CSS
+- Supabase (Postgres, Frankfurt) for doctors, clinics, availability and bookings
+- Vercel for hosting (functions in `fra1`, next to the database)
+
+## How it works
+
+- `app/page.tsx` loads cities, specialties, clinics, doctors and the next 4 days of free slots on every request (`lib/directory.ts`).
+- Patients book as guests: name and phone, optional email and note. They get a booking code like `MJK-7Q2F9K`.
+- "Rezervimi im / My booking" finds a booking by code + phone number and can cancel it up to 2 hours before.
+- Bookings are never readable through the API. The website only calls three database functions: `book_slot`, `find_booking` and `cancel_booking` (see `app/actions.ts`).
+- A nightly job (pg_cron, 01:10 UTC) creates slots 3 weeks ahead from each doctor's opening hours.
+- Without Supabase environment variables, the site runs on the same demo data from `lib/seed.json`, and bookings aren't saved.
 
 ## Run it locally
 
 ```bash
+cp .env.example .env.local
 npm install
 npm run dev
 ```
@@ -22,33 +35,38 @@ Open http://localhost:3000.
 
 | What | File |
 | --- | --- |
-| Brand name, country, tagline | `lib/site.ts` |
-| Practitioners, slots, directory lists | `lib/data.ts` |
-| Search and matching logic | `lib/search.ts` |
-| Page sections | `components/*.tsx` |
-| Colors, type, layout | `app/globals.css` |
+| All text, Albanian and English | `lib/i18n.ts` |
+| Demo doctors, clinics, cities, opening hours | `lib/seed.json` |
+| Services, institution types, popular searches | `lib/taxonomy.ts` |
+| Search logic | `lib/search.ts` |
+| Dates and prices in Kosovo time | `lib/format.ts` |
+| Booking server actions | `app/actions.ts` |
+| Page sections and dialogs | `components/*.tsx` |
+| Styles | `app/globals.css`, `app/booking.css` |
+| Database schema and functions | `supabase/migrations/` |
+| Demo data SQL (generated) | `supabase/seed.sql` |
 
-## Sections
+## Database
 
-Header with language menu · hero with in-person/video toggle, grouped search (specialties, practitioners, institutions) and news chips · 4 benefits · data protection · video consultations in 3 steps · practitioners available today with filters · app download with QR code · Mjeku.Im Pro for practitioners · directory (specialists, expertise, institutions) with popular searches by city · FAQ · footer.
+Supabase project `mjeku-im` (ref `xulrcmxkpbxpsnmrpsjw`, region eu-central-1).
 
-Booking, sign-in, app store links and the Pro buttons show a "coming soon" note. Nothing is booked for real yet.
+- Schema: `supabase/migrations/20260924120000_init.sql`
+- Nightly slot job: `supabase/migrations/20260924120100_daily_slots_cron.sql`
+- Demo data: edit `lib/seed.json`, run `node scripts/make-seed-sql.mjs`, then run `supabase/seed.sql`
+
+The demo job marks about 30% of new slots as taken so calendars look realistic. For real clinics, change it to `generate_slots(21, 0)`.
+
+## Before going live with real patients
+
+- Add a captcha (e.g. Cloudflare Turnstile) and rate limiting to booking, or move the booking functions behind a server-only key.
+- Send confirmations and reminders by SMS or email (e.g. Twilio, Resend).
+- Add a clinic dashboard so practices manage their own hours and see their bookings.
+- Add a privacy policy and terms, and review them against Law No. 06/L-082 on the Protection of Personal Data.
 
 ## Push to GitHub
 
-Create an empty repository on GitHub (no README), then from this folder:
-
 ```bash
-git remote add origin https://github.com/<your-user>/mjeku-im.git
+git remote add origin https://github.com/trimiiss/Mjeku.Im.git
 git branch -M main
 git push -u origin main
 ```
-
-Then in Vercel, open the `mjeku-im` project → Settings → Git and connect the repository, so every push deploys automatically.
-
-## Next steps
-
-- Supabase: tables for practitioners, clinics, availability slots and bookings, plus patient sign-in
-- Next.js server actions to book, move and cancel appointments
-- SMS reminders through a provider such as Twilio
-- Albanian, German, French and Italian translations

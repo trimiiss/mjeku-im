@@ -1,41 +1,39 @@
-import { site } from "@/lib/site";
+"use client";
+
+import { useApp } from "./AppContext";
 import { ArrowRightIcon, CheckIcon, LockIcon, ServerIcon, ShieldIcon, UsersIcon } from "./Icons";
 
+const pointIcons = [LockIcon, ServerIcon, UsersIcon];
+const barWidths = ["86%", "62%", "74%", "48%"];
+
 export function Security() {
+  const { t } = useApp();
+  const s = t.security;
+
   return (
     <section className="section section--mist" id="privacy" aria-labelledby="privacy-title">
       <div className="container split">
         <div className="stack">
-          <p className="eyebrow">Data protection</p>
+          <p className="eyebrow">{s.eyebrow}</p>
           <h2 id="privacy-title" className="h2">
-            Your health data is safe with {site.fullName}
+            {s.title}
           </h2>
-          <p className="lede">
-            Your data is encrypted and stored on servers in {site.country}, in line with the Swiss Federal Act on
-            Data Protection (nFADP). Only you and the practitioners you book with can see your appointments.
-          </p>
+          <p className="lede">{s.lede}</p>
           <ul className="checklist">
-            <li>
-              <span className="tick">
-                <LockIcon width={16} height={16} />
-              </span>
-              Encrypted in transit and at rest
-            </li>
-            <li>
-              <span className="tick">
-                <ServerIcon width={16} height={16} />
-              </span>
-              Hosted in Swiss data centres
-            </li>
-            <li>
-              <span className="tick">
-                <UsersIcon width={16} height={16} />
-              </span>
-              You decide who sees your information
-            </li>
+            {s.points.map((p, i) => {
+              const Icon = pointIcons[i];
+              return (
+                <li key={p}>
+                  <span className="tick">
+                    <Icon width={16} height={16} />
+                  </span>
+                  {p}
+                </li>
+              );
+            })}
           </ul>
           <a className="link" href="#faq">
-            Read our privacy commitments
+            {s.link}
             <ArrowRightIcon width={18} height={18} />
           </a>
         </div>
@@ -47,34 +45,24 @@ export function Security() {
                 <ShieldIcon />
               </span>
               <div>
-                <b>Your patient file</b>
-                <span>Encrypted · visible only to you</span>
+                <b>{s.fileTitle}</b>
+                <span>{s.fileSub}</span>
               </div>
             </div>
             <div className="vault-rows">
-              <div className="vault-row">
-                <span>Appointments</span>
-                <i style={{ width: "86%" }} />
-              </div>
-              <div className="vault-row">
-                <span>Reason for visit</span>
-                <i style={{ width: "62%" }} />
-              </div>
-              <div className="vault-row">
-                <span>Contact details</span>
-                <i style={{ width: "74%" }} />
-              </div>
-              <div className="vault-row">
-                <span>Insurance</span>
-                <i style={{ width: "48%" }} />
-              </div>
+              {s.rows.map((r, i) => (
+                <div className="vault-row" key={r}>
+                  <span>{r}</span>
+                  <i style={{ width: barWidths[i] }} />
+                </div>
+              ))}
             </div>
             <div className="vault-foot">
-              <span className="ch">CH</span>
-              Stored in Switzerland
+              <span className="ch">EU</span>
+              {s.stored}
               <span className="vault-ok">
                 <CheckIcon width={14} height={14} />
-                nFADP
+                {s.law}
               </span>
             </div>
           </div>

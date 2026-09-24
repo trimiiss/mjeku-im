@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { site } from "@/lib/site";
+import { useApp } from "./AppContext";
 import { CheckIcon, MessageIcon, PhoneIcon } from "./Icons";
-import { useSearch } from "./SearchContext";
 
-function QrCode() {
+function QrCode({ label }: { label: string }) {
   const [svg, setSvg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,15 +25,16 @@ function QrCode() {
   }, []);
 
   return (
-    <div className="qr" role="img" aria-label={`QR code that opens ${site.fullName} on your phone`}>
+    <div className="qr" role="img" aria-label={label}>
       {svg ? <span dangerouslySetInnerHTML={{ __html: svg }} /> : <span className="qr-placeholder" />}
     </div>
   );
 }
 
 export function AppPromo() {
-  const { notify } = useSearch();
-  const soon = () => notify(`The ${site.fullName} app is coming soon`, "Until then, you can book right here on the website.");
+  const { t, notify } = useApp();
+  const a = t.app;
+  const soon = () => notify(a.soonTitle, a.soonBody);
 
   return (
     <section className="section" id="app" aria-labelledby="app-title">
@@ -47,83 +47,65 @@ export function AppPromo() {
                 <span className="phone-notch" />
                 <span>5G</span>
               </div>
-              <p className="phone-hello">Good morning, Arben</p>
+              <p className="phone-hello">{a.phone.hello}</p>
               <div className="phone-next">
-                <span className="phone-label">Next appointment</span>
-                <b>Tomorrow, 09:40</b>
-                <span>Dr. med. dent. Lukas Meier</span>
-                <span className="phone-sub">Dentist · Zahnarztpraxis Rosengarten</span>
+                <span className="phone-label">{a.phone.next}</span>
+                <b>{a.phone.when}</b>
+                <span>{a.phone.who}</span>
+                <span className="phone-sub">{a.phone.where}</span>
                 <span className="phone-sms">
                   <MessageIcon width={14} height={14} />
-                  SMS reminder scheduled
+                  {a.phone.sms}
                 </span>
               </div>
-              <div className="phone-row">
-                <span className="phone-dot">AK</span>
-                <div>
-                  <b>Dr. med. Arta Krasniqi</b>
-                  <span>Check-up · 12 Oct, 14:30</span>
+              {a.phone.rows.map((r) => (
+                <div className="phone-row" key={r.name}>
+                  <span className="phone-dot">{r.initials}</span>
+                  <div>
+                    <b>{r.name}</b>
+                    <span>{r.info}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="phone-row">
-                <span className="phone-dot">SR</span>
-                <div>
-                  <b>Sophie Rochat</b>
-                  <span>Physiotherapy · 3 Nov, 09:45</span>
-                </div>
-              </div>
-              <span className="phone-cta">Book an appointment</span>
+              ))}
+              <span className="phone-cta">{a.phone.cta}</span>
             </div>
           </div>
         </div>
 
         <div className="stack">
-          <p className="eyebrow">Mobile app</p>
+          <p className="eyebrow">{a.eyebrow}</p>
           <h2 id="app-title" className="h2">
-            Download the {site.fullName} app
+            {a.title}
           </h2>
-          <p className="lede">
-            Book a doctor, dentist or therapist near you in {site.country}, and keep all your medical appointments on
-            your phone, wherever you are.
-          </p>
+          <p className="lede">{a.lede}</p>
           <ul className="checklist">
-            <li>
-              <span className="tick">
-                <CheckIcon width={16} height={16} />
-              </span>
-              All upcoming and past appointments in one list
-            </li>
-            <li>
-              <span className="tick">
-                <CheckIcon width={16} height={16} />
-              </span>
-              Reminders by SMS and push notification
-            </li>
-            <li>
-              <span className="tick">
-                <CheckIcon width={16} height={16} />
-              </span>
-              Book for your children and family members
-            </li>
+            {a.points.map((p) => (
+              <li key={p}>
+                <span className="tick">
+                  <CheckIcon width={16} height={16} />
+                </span>
+                {p}
+              </li>
+            ))}
           </ul>
           <div className="qr-row">
-            <QrCode />
+            <QrCode label={a.qrLabel} />
             <div className="store-btns">
               <p className="qr-note">
                 <PhoneIcon width={16} height={16} />
-                Scan to open on your phone
+                {a.scan}
               </p>
               <button type="button" className="store-btn" onClick={soon}>
                 <PhoneIcon width={22} height={22} />
                 <span>
-                  <small>Download on the</small>
+                  <small>{a.appStoreSmall}</small>
                   <b>App Store</b>
                 </span>
               </button>
               <button type="button" className="store-btn" onClick={soon}>
                 <PhoneIcon width={22} height={22} />
                 <span>
-                  <small>Get it on</small>
+                  <small>{a.playSmall}</small>
                   <b>Google Play</b>
                 </span>
               </button>

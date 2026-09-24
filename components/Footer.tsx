@@ -1,21 +1,23 @@
 "use client";
 
-import { footerExpertises, footerInstitutions, footerSpecialties, type DirectoryItem } from "@/lib/data";
-import { site } from "@/lib/site";
+import { specialtyName } from "@/lib/search";
+import { clinicTypes, expertise } from "@/lib/taxonomy";
+import type { Lang, Query } from "@/lib/types";
+import { useApp } from "./AppContext";
 import { Logo } from "./Logo";
-import { useSearch } from "./SearchContext";
 
 const socials = ["Facebook", "LinkedIn", "Instagram", "X", "YouTube"];
+const base: Partial<Query> = { city: "", cityId: undefined, clinicType: undefined, specialtyId: undefined, mode: "in_person" };
 
-function SearchColumn({ title, items, all }: { title: string; items: DirectoryItem[]; all: string }) {
-  const { runSearch } = useSearch();
+function Column({ title, all, items }: { title: string; all: string; items: { key: string; label: string; query: Partial<Query> }[] }) {
+  const { runSearch } = useApp();
   return (
     <div className="footer-col">
       <h3>{title}</h3>
       <ul>
         {items.map((it) => (
-          <li key={it.label}>
-            <button type="button" onClick={() => runSearch({ q: it.label, city: "", mode: "in-person" })}>
+          <li key={it.key}>
+            <button type="button" onClick={() => runSearch(it.query)}>
               {it.label}
             </button>
           </li>
@@ -31,76 +33,102 @@ function SearchColumn({ title, items, all }: { title: string; items: DirectoryIt
 }
 
 export function Footer() {
-  const { notify } = useSearch();
-  const soon = (what: string) => () => notify(`${what} is coming soon`, `This page isn't part of the ${site.fullName} preview yet.`);
+  const { t, lang, setLang, dir, notify } = useApp();
+  const f = t.footer;
+  const soon = (what: string) => () => notify(t.common.soonTitle(what), t.common.soonBody);
+
+  const specialists = dir.specialties.slice(0, 8).map((s) => {
+    const label = specialtyName(s, lang);
+    return { key: s.id, label, query: { ...base, q: label, label, specialtyId: s.id } };
+  });
+  const services = expertise.slice(0, 8).map((e) => ({
+    key: e.id,
+    label: e[lang],
+    query: { ...base, q: e[lang], label: e[lang], specialtyId: e.specialtyId },
+  }));
+  const institutions = Array.from(new Set(dir.clinics.map((c) => c.type)))
+    .slice(0, 8)
+    .map((type) => {
+      const label = clinicTypes[type]?.[lang] ?? type;
+      return { key: type, label, query: { ...base, q: label, label, clinicType: type } };
+    });
+
+  const langs: { code: Lang; name: string }[] = [
+    { code: "sq", name: "Shqip" },
+    { code: "en", name: "English" },
+  ];
 
   return (
     <footer className="site-footer">
       <div className="container">
         <div className="footer-top">
           <div className="footer-brand">
-            <a href="#top" className="brand" aria-label={`${site.fullName} home`}>
+            <a href="#top" className="brand" aria-label={t.nav.home}>
               <Logo />
             </a>
-            <p>{site.tagline}</p>
-            <p className="muted small">
-              Book doctors, dentists and therapists across {site.country}, in person or by video.
-            </p>
+            <p>{f.tagline}</p>
+            <p className="muted small">{f.about}</p>
           </div>
 
           <div className="footer-col">
-            <h3>{site.fullName}</h3>
+            <h3>{f.company}</h3>
             <ul>
               <li>
-                <a href="#pro">I&apos;m a healthcare professional</a>
+                <a href="#pro">{f.links.pros}</a>
               </li>
               <li>
-                <button type="button" onClick={soon("About us")}>
-                  About us
+                <button type="button" onClick={soon(f.links.about)}>
+                  {f.links.about}
                 </button>
               </li>
               <li>
-                <button type="button" onClick={soon("The press page")}>
-                  Press
+                <button type="button" onClick={soon(f.links.press)}>
+                  {f.links.press}
                 </button>
               </li>
               <li>
-                <button type="button" onClick={soon("The careers page")}>
-                  Careers
+                <button type="button" onClick={soon(f.links.careers)}>
+                  {f.links.careers}
                 </button>
               </li>
               <li>
-                <a href="#privacy">Privacy centre</a>
+                <a href="#privacy">{f.links.privacy}</a>
               </li>
               <li>
-                <button type="button" onClick={soon("Cookie settings")}>
-                  Cookie settings
+                <button type="button" onClick={soon(f.links.cookies)}>
+                  {f.links.cookies}
                 </button>
               </li>
               <li>
-                <a href="#faq">Help centre</a>
+                <a href="#faq">{f.links.help}</a>
               </li>
             </ul>
           </div>
 
-          <SearchColumn title="Find a specialist" items={footerSpecialties} all="All specialties" />
-          <SearchColumn title="Find an expertise" items={footerExpertises} all="All expertise" />
-          <SearchColumn title="Find an institution" items={footerInstitutions} all="All institutions" />
+          <Column title={f.specialists} all={f.allSpecialists} items={specialists} />
+          <Column title={f.expertise} all={f.allExpertise} items={services} />
+          <Column title={f.institutions} all={f.allInstitutions} items={institutions} />
         </div>
 
         <div className="footer-mid">
           <div className="footer-langs">
-            <span className="footer-mini">Languages</span>
-            <span aria-current="true">English</span>
-            <span>Shqip</span>
-            <span>Deutsch</span>
-            <span>Français</span>
-            <span>Italiano</span>
+            <span className="footer-mini">{f.language}</span>
+            {langs.map((l) => (
+              <button
+                key={l.code}
+                type="button"
+                lang={l.code}
+                aria-current={lang === l.code ? "true" : undefined}
+                onClick={() => setLang(l.code)}
+              >
+                {l.name}
+              </button>
+            ))}
           </div>
           <div className="footer-social">
-            <span className="footer-mini">Follow us</span>
+            <span className="footer-mini">{f.follow}</span>
             {socials.map((s) => (
-              <button key={s} type="button" onClick={soon(`Our ${s} page`)}>
+              <button key={s} type="button" onClick={soon(s)}>
                 {s}
               </button>
             ))}
@@ -109,14 +137,14 @@ export function Footer() {
 
         <div className="footer-bottom">
           <p>
-            © {new Date().getFullYear()} {site.fullName}. All rights reserved.
+            © {new Date().getFullYear()} Mjeku.Im. {f.rights}
           </p>
           <div className="footer-legal">
-            <button type="button" onClick={soon("Terms of use")}>
-              Terms of use
+            <button type="button" onClick={soon(f.terms)}>
+              {f.terms}
             </button>
-            <button type="button" onClick={soon("The legal notice")}>
-              Legal notice
+            <button type="button" onClick={soon(f.legal)}>
+              {f.legal}
             </button>
           </div>
         </div>

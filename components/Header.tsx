@@ -1,144 +1,111 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { site } from "@/lib/site";
+import { useState } from "react";
+import type { Lang } from "@/lib/types";
+import { useApp } from "./AppContext";
+import { CloseIcon, MenuIcon, SearchIcon } from "./Icons";
+import { TicketIcon } from "./IconsExtra";
 import { Logo } from "./Logo";
-import { ChevronDownIcon, CloseIcon, GlobeIcon, MenuIcon, SearchIcon } from "./Icons";
-import { useSearch } from "./SearchContext";
 
-const languages = [
-  { code: "EN", name: "English", live: true },
-  { code: "SQ", name: "Shqip", live: false },
-  { code: "DE", name: "Deutsch", live: false },
-  { code: "FR", name: "Français", live: false },
-  { code: "IT", name: "Italiano", live: false },
-];
-
-function LanguageMenu() {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
+function LangToggle() {
+  const { lang, setLang, t } = useApp();
+  const options: { code: Lang; label: string; name: string }[] = [
+    { code: "sq", label: "SQ", name: "Shqip" },
+    { code: "en", label: "EN", name: "English" },
+  ];
   return (
-    <div className="lang" ref={ref}>
-      <button
-        type="button"
-        className="btn btn-ghost btn-sm lang-btn"
-        aria-haspopup="true"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-      >
-        <GlobeIcon width={18} height={18} />
-        EN
-        <ChevronDownIcon width={16} height={16} />
-      </button>
-      {open && (
-        <ul className="lang-menu" aria-label="Language">
-          {languages.map((l) => (
-            <li key={l.code}>
-              <button
-                type="button"
-                aria-current={l.live ? "true" : undefined}
-                aria-disabled={!l.live}
-                onClick={() => l.live && setOpen(false)}
-              >
-                <span>
-                  <b>{l.code}</b> {l.name}
-                </span>
-                {l.live ? <span className="lang-on">Current</span> : <span className="soon">Soon</span>}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="lang-toggle" role="group" aria-label={t.nav.language}>
+      {options.map((o) => (
+        <button
+          key={o.code}
+          type="button"
+          lang={o.code}
+          aria-pressed={lang === o.code}
+          aria-label={o.name}
+          onClick={() => setLang(o.code)}
+        >
+          {o.label}
+        </button>
+      ))}
     </div>
   );
 }
 
 export function Header() {
-  const { focusSearch, notify } = useSearch();
+  const { t, focusSearch, setManageOpen } = useApp();
   const [menuOpen, setMenuOpen] = useState(false);
+  const close = () => setMenuOpen(false);
 
-  const signIn = () => {
-    setMenuOpen(false);
-    notify("Sign in opens at launch", `Patient accounts for ${site.fullName} aren't live in this preview yet.`);
+  const myBooking = () => {
+    close();
+    setManageOpen(true);
   };
 
-  const closeMenu = () => setMenuOpen(false);
-
   return (
-    <header className="site-header">
-      <div className="container header-inner">
-        <a href="#top" className="brand" aria-label={`${site.fullName} home`}>
-          <Logo />
-        </a>
+    <>
+      <p className="demo-banner">{t.demoBanner}</p>
+      <header className="site-header">
+        <div className="container header-inner">
+          <a href="#top" className="brand" aria-label={t.nav.home}>
+            <Logo />
+          </a>
 
-        <nav className="main-nav" aria-label="Main">
-          <button type="button" onClick={focusSearch}>
-            <SearchIcon width={17} height={17} />
-            Search
-          </button>
-          <a href="#video">Video consultations</a>
-          <a href="#pro">I&apos;m a healthcare professional</a>
-          <a href="#faq">Help centre</a>
-        </nav>
+          <nav className="main-nav" aria-label="Main">
+            <button type="button" onClick={focusSearch}>
+              <SearchIcon width={17} height={17} />
+              {t.nav.search}
+            </button>
+            <a href="#video">{t.nav.video}</a>
+            <a href="#pro">{t.nav.pros}</a>
+            <a href="#faq">{t.nav.help}</a>
+          </nav>
 
-        <div className="header-actions">
-          <LanguageMenu />
-          <button type="button" className="btn btn-outline btn-sm signin" onClick={signIn}>
-            Sign in
-          </button>
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm menu-btn"
-            aria-expanded={menuOpen}
-            aria-controls="mobile-nav"
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            {menuOpen ? <CloseIcon width={20} height={20} /> : <MenuIcon width={20} height={20} />}
-            <span className="sr-only">Menu</span>
-          </button>
+          <div className="header-actions">
+            <LangToggle />
+            <button type="button" className="btn btn-outline btn-sm signin" onClick={myBooking}>
+              <TicketIcon />
+              {t.nav.myBooking}
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm menu-btn"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-nav"
+              onClick={() => setMenuOpen((o) => !o)}
+            >
+              {menuOpen ? <CloseIcon width={20} height={20} /> : <MenuIcon width={20} height={20} />}
+              <span className="sr-only">{t.nav.menu}</span>
+            </button>
+          </div>
         </div>
-      </div>
 
-      {menuOpen && (
-        <nav id="mobile-nav" className="container mobile-nav" aria-label="Mobile">
-          <button
-            type="button"
-            onClick={() => {
-              closeMenu();
-              focusSearch();
-            }}
-          >
-            Search
-          </button>
-          <a href="#video" onClick={closeMenu}>
-            Video consultations
-          </a>
-          <a href="#pro" onClick={closeMenu}>
-            I&apos;m a healthcare professional
-          </a>
-          <a href="#faq" onClick={closeMenu}>
-            Help centre
-          </a>
-          <button type="button" className="btn btn-primary" onClick={signIn}>
-            Sign in
-          </button>
-        </nav>
-      )}
-    </header>
+        {menuOpen && (
+          <nav id="mobile-nav" className="container mobile-nav" aria-label={t.nav.menu}>
+            <button
+              type="button"
+              onClick={() => {
+                close();
+                focusSearch();
+              }}
+            >
+              {t.nav.search}
+            </button>
+            <a href="#video" onClick={close}>
+              {t.nav.video}
+            </a>
+            <a href="#pro" onClick={close}>
+              {t.nav.pros}
+            </a>
+            <a href="#faq" onClick={close}>
+              {t.nav.help}
+            </a>
+            <button type="button" className="btn btn-primary" onClick={myBooking}>
+              <TicketIcon />
+              {t.nav.myBooking}
+            </button>
+          </nav>
+        )}
+      </header>
+    </>
   );
 }

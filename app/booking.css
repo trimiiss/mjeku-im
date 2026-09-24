@@ -1,0 +1,553 @@
+/* Mjeku.Im: demo banner, language switch, booking and "my booking" dialogs.
+   Uses the tokens defined in globals.css. */
+
+.demo-banner {
+  margin: 0;
+  padding: 8px var(--gutter);
+  background: var(--ink);
+  color: #d7ecf8;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* ---------- Language switch ---------- */
+
+.lang-toggle {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--white);
+}
+
+.lang-toggle button {
+  min-width: 38px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--ink-2);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.lang-toggle button:hover {
+  color: var(--ink);
+}
+
+.lang-toggle button[aria-pressed="true"] {
+  background: var(--baby);
+  color: var(--ink);
+}
+
+.signin svg {
+  width: 17px;
+  height: 17px;
+}
+
+.footer-langs button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  font-size: 0.93rem;
+}
+
+.footer-langs button:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.footer-langs button[aria-current="true"] {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+/* ---------- Cards ---------- */
+
+.badge--price {
+  background: var(--white);
+  border-color: var(--line-strong);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.today-label.is-later {
+  color: var(--sky-ink);
+}
+
+.today-label.is-later::before {
+  background: var(--baby-deep);
+}
+
+.today-none {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--mist);
+  color: var(--ink-2);
+  font-size: 0.9rem;
+}
+
+.slot--more {
+  background: var(--white);
+  border-style: dashed;
+  color: var(--sky-ink);
+}
+
+/* ---------- Dialogs ---------- */
+
+.dialog {
+  width: min(520px, 100% - 24px);
+  max-height: min(92dvh, 900px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-xl);
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: 0 40px 80px -30px rgb(13 42 58 / 0.55);
+  overflow: auto;
+}
+
+.dialog::backdrop {
+  background: rgb(13 42 58 / 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.dialog[open] {
+  animation: dialog-in 0.2s ease-out;
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dialog-inner {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+}
+
+.dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dialog-head h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.dialog-x {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--ink);
+}
+
+.dialog-x:hover {
+  background: var(--baby-50);
+}
+
+.booking-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px 14px;
+  padding: 16px;
+  border-radius: var(--r-lg);
+  background: var(--mist);
+  border: 1px solid var(--line);
+}
+
+.booking-summary .avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+}
+
+.booking-when,
+.booking-where {
+  grid-column: 1 / -1;
+}
+
+.booking-when {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line-strong);
+}
+
+.booking-when b {
+  font-size: 1.02rem;
+}
+
+.booking-when span {
+  color: var(--ink-2);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.booking-where {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-2);
+  font-size: 0.92rem;
+}
+
+.booking-where svg {
+  color: var(--sky-ink);
+}
+
+.booking-price {
+  margin-left: auto;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--white);
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Forms ---------- */
+
+.booking-form {
+  display: grid;
+  gap: 14px;
+}
+
+.form-field {
+  display: grid;
+  gap: 6px;
+}
+
+.form-field label {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.form-field input,
+.form-field textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--white);
+  font-size: 1rem;
+  line-height: 1.4;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-field textarea {
+  font: inherit;
+  color: inherit;
+  resize: vertical;
+  min-height: 64px;
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+  color: var(--ink-3);
+  opacity: 1;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: var(--sky-ink);
+  box-shadow: 0 0 0 3px var(--baby-200);
+}
+
+.form-field small {
+  color: var(--ink-2);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.mode-pick {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.mode-pick legend {
+  margin-bottom: 6px;
+  padding: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.mode-pick label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mode-pick label:has(input:checked) {
+  border-color: var(--sky-ink);
+  background: var(--baby-50);
+  box-shadow: 0 0 0 2px var(--baby-200);
+}
+
+.mode-pick label:has(input:focus-visible) {
+  outline: 3px solid var(--sky-ink);
+  outline-offset: 2px;
+}
+
+.mode-pick input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mode-pick svg {
+  color: var(--sky-ink);
+}
+
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.consent input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--sky-ink);
+}
+
+.form-error,
+.form-ok {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.form-error {
+  background: #fdecec;
+  color: #a4262c;
+}
+
+.form-ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.form-error svg,
+.form-ok svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.btn-block {
+  width: 100%;
+  min-height: 50px;
+}
+
+.btn[disabled] {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.btn-danger {
+  background: #fdecec;
+  border-color: #f4c7c9;
+  color: #a4262c;
+}
+
+.btn-danger:hover {
+  background: #fadadb;
+}
+
+.demo-note {
+  color: var(--ink-3);
+  font-size: 0.8rem;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ---------- Success ---------- */
+
+.booking-done {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.done-icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.code-label {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.code {
+  padding: 10px 18px;
+  border: 2px dashed var(--baby-deep);
+  border-radius: 14px;
+  background: var(--baby-50);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  user-select: all;
+}
+
+.booking-done .muted {
+  max-width: 34ch;
+  font-size: 0.92rem;
+}
+
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* ---------- My booking ---------- */
+
+.manage-found {
+  display: grid;
+  gap: 14px;
+}
+
+.manage-meta {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.manage-meta div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.94rem;
+}
+
+.manage-meta dt {
+  color: var(--ink-2);
+}
+
+.manage-meta dd {
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
+}
+
+.code-inline {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  letter-spacing: 0.05em;
+}
+
+.status {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.status--confirmed {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.status--cancelled {
+  background: #fdecec;
+  color: #a4262c;
+}
+
+.confirm-box {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #f4c7c9;
+  border-radius: 14px;
+  background: #fff7f7;
+  font-size: 0.94rem;
+}
+
+.confirm-box .dialog-actions {
+  justify-content: flex-start;
+}
+
+.manage-found .link {
+  justify-self: center;
+}
+
+@media (max-width: 480px) {
+  .dialog {
+    width: 100%;
+    max-width: 100%;
+    max-height: 94dvh;
+    margin: auto 0 0;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+  }
+
+  .dialog-inner {
+    padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .booking-price {
+    margin-left: 0;
+  }
+}

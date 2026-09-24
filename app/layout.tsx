@@ -1,31 +1,36 @@
 import type { Metadata, Viewport } from "next";
 import { Figtree, Gabarito } from "next/font/google";
-import { site } from "@/lib/site";
+import { cookies } from "next/headers";
+import { dictionaries } from "@/lib/i18n";
 import "./globals.css";
+import "./booking.css";
 
 // next/font downloads these at build time and serves them from the site itself,
-// so visitors' browsers never contact Google (good for nFADP/GDPR).
+// so visitors' browsers never contact Google (good for GDPR).
 const display = Gabarito({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-display",
   display: "swap",
 });
 
 const body = Figtree({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-body",
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: `${site.fullName} | Book a doctor in ${site.country}`,
-  description: site.description,
-  openGraph: {
-    title: `${site.fullName} | Book a doctor in ${site.country}`,
-    description: site.description,
-    type: "website",
-  },
-};
+async function currentLang() {
+  return (await cookies()).get("lang")?.value === "en" ? "en" : "sq";
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = dictionaries[await currentLang()];
+  return {
+    title: t.meta.title,
+    description: t.meta.description,
+    openGraph: { title: t.meta.title, description: t.meta.description, type: "website", locale: "sq_XK" },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#89CFF0",
@@ -33,9 +38,10 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const lang = await currentLang();
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`}>
+    <html lang={lang} className={`${display.variable} ${body.variable}`}>
       <body>{children}</body>
     </html>
   );
