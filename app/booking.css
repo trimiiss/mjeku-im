@@ -185,8 +185,23 @@
 }
 
 .booking-when,
-.booking-where {
+.booking-where,
+.booking-reason {
   grid-column: 1 / -1;
+}
+
+.booking-reason {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  font-weight: 700;
+}
+
+.booking-reason span {
+  color: var(--ink-2);
+  font-size: 0.86rem;
+  font-weight: 600;
 }
 
 .booking-when {

@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { dictionaries } from "@/lib/i18n";
 import "./globals.css";
 import "./booking.css";
+import "./profile.css";
 
 // next/font downloads these at build time and serves them from the site itself,
 // so visitors' browsers never contact Google (good for GDPR).

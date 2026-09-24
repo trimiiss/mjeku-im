@@ -9,6 +9,10 @@ const DAYS: Record<Lang, string[]> = {
   sq: ["e hënë", "e martë", "e mërkurë", "e enjte", "e premte", "e shtunë", "e diel"],
   en: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
 };
+const DAYS_SHORT: Record<Lang, string[]> = {
+  sq: ["Hën", "Mar", "Mër", "Enj", "Pre", "Sht", "Die"],
+  en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+};
 const MONTHS: Record<Lang, string[]> = {
   sq: ["janar", "shkurt", "mars", "prill", "maj", "qershor", "korrik", "gusht", "shtator", "tetor", "nëntor", "dhjetor"],
   en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
@@ -42,6 +46,22 @@ function keyParts(key: string) {
   return { y, m, d };
 }
 
+/** Kosovo day key, ISO weekday and minutes since midnight for a moment. */
+export function localNow(d: string | number | Date) {
+  const p = localParts(d);
+  const key = `${p.y}-${pad(p.m)}-${pad(p.d)}`;
+  return { key, weekday: isoWeekday(key), minutes: p.h * 60 + p.min };
+}
+
+/** "08:00:00" or "08:00" to minutes since midnight. */
+export function hhmmToMinutes(t: string) {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+}
+
+/** "08:00:00" to "08:00". */
+export const shortTime = (t: string) => t.slice(0, 5);
+
 /** "2026-09-24" for the Kosovo calendar day of a moment. */
 export function dayKey(d: string | number | Date) {
   const p = localParts(d);
@@ -52,6 +72,13 @@ export function dayKey(d: string | number | Date) {
 export function addDaysKey(key: string, n: number) {
   const { y, m, d } = keyParts(key);
   return new Date(Date.UTC(y, m - 1, d + n, 12)).toISOString().slice(0, 10);
+}
+
+/** Whole days from day key a to day key b. */
+export function daysBetween(a: string, b: string) {
+  const x = keyParts(a);
+  const y = keyParts(b);
+  return Math.round((Date.UTC(y.y, y.m - 1, y.d) - Date.UTC(x.y, x.m - 1, x.d)) / 86_400_000);
 }
 
 /** ISO weekday (1 = Monday) of a day key. */
@@ -66,8 +93,18 @@ export function formatTime(iso: string, _lang?: Lang) {
   return `${pad(p.h)}:${pad(p.min)}`;
 }
 
+/** Weekday name from an ISO weekday number (1 = Monday). */
+export function dayName(weekday: number, lang: Lang) {
+  return cap(DAYS[lang][weekday - 1]);
+}
+
 export function weekdayName(key: string, lang: Lang) {
   return cap(DAYS[lang][isoWeekday(key) - 1]);
+}
+
+/** "Enj" / "Thu" for a day key. */
+export function shortDayName(key: string, lang: Lang) {
+  return DAYS_SHORT[lang][isoWeekday(key) - 1];
 }
 
 export function shortDate(key: string, lang: Lang) {

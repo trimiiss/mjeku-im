@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition, type FormEvent } from "react";
 import { bookSlot } from "@/app/actions";
 import { formatPrice, formatTime, longDate } from "@/lib/format";
+import { profileDicts } from "@/lib/profileText";
 import { cityName, displayName, initials, specialtyName } from "@/lib/search";
 import type { BookingResult, Mode, Slot } from "@/lib/types";
 import { useApp } from "./AppContext";
@@ -36,9 +37,10 @@ function icsHref(code: string, slot: Slot, title: string, location: string) {
 }
 
 export function BookingDialog() {
-  const { t, lang, idx, bookingSlot, closeBooking, refresh } = useApp();
+  const { t, lang, idx, bookingSlot, bookingReason, closeBooking, refresh } = useApp();
   const ref = useRef<HTMLDialogElement>(null);
   const [slot, setSlot] = useState<Slot | null>(null);
+  const [reason, setReason] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>("in_person");
   const [form, setForm] = useState({ name: "", phone: "", email: "", note: "" });
   const [consent, setConsent] = useState(false);
@@ -51,6 +53,7 @@ export function BookingDialog() {
     if (!d) return;
     if (bookingSlot) {
       setSlot(bookingSlot);
+      setReason(bookingReason);
       setMode("in_person");
       setError(null);
       setResult(null);
@@ -59,7 +62,7 @@ export function BookingDialog() {
     } else if (d.open) {
       d.close();
     }
-  }, [bookingSlot]);
+  }, [bookingSlot, bookingReason]);
 
   const p = slot ? idx.practitionerById.get(slot.practitioner_id) : undefined;
   const clinic = p ? idx.clinicById.get(p.clinic_id) : undefined;
@@ -80,7 +83,7 @@ export function BookingDialog() {
     }
     setError(null);
     startTransition(async () => {
-      const r = await bookSlot({ slotId: slot.id, ...form, mode, lang });
+      const r = await bookSlot({ slotId: slot.id, ...form, mode, lang, reason: reason ?? undefined });
       if (r.ok) {
         setResult(r);
       } else {
@@ -123,6 +126,12 @@ export function BookingDialog() {
                 {formatTime(slot.starts_at, lang)} · {t.common.minutes(slot.duration_min)}
               </span>
             </p>
+            {reason && (
+              <p className="booking-reason">
+                <span>{profileDicts[lang].reasonLabel}</span>
+                {reason}
+              </p>
+            )}
             <p className="booking-where">
               <PinIcon width={16} height={16} />
               {clinic?.name}, {city}

@@ -27,14 +27,15 @@ export async function bookSlot(input: BookingInput): Promise<BookingResult> {
   const phone = clean(input.phone, 30);
   const email = clean(input.email, 120);
   const note = clean(input.note, 300);
+  const reason = clean(input.reason, 80);
   const mode: Mode = input.mode === "video" ? "video" : "in_person";
 
   if (name.length < 3) return { ok: false, error: "invalid_name" };
   if (phone.replace(/[^0-9]/g, "").length < 8) return { ok: false, error: "invalid_phone" };
 
   const sb = getSupabase();
-  if (!sb) {
-    // No database configured (local preview): pretend it worked, but say so in the UI.
+  if (!sb || !Number.isInteger(input.slotId) || input.slotId < 0) {
+    // No database configured, or the page is showing offline demo slots: pretend it worked, but say so in the UI.
     return { ok: true, code: "MJK-DEMO00", startsAt: new Date().toISOString(), practitionerId: "", mode, offline: true };
   }
 
@@ -46,6 +47,7 @@ export async function bookSlot(input: BookingInput): Promise<BookingResult> {
     p_mode: mode,
     p_note: note || null,
     p_locale: input.lang === "en" ? "en" : "sq",
+    p_reason: reason || null,
   });
   if (error) return { ok: false, error: toError(error.message) };
 

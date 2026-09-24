@@ -10,7 +10,7 @@ const socials = ["Facebook", "LinkedIn", "Instagram", "X", "YouTube"];
 const base: Partial<Query> = { city: "", cityId: undefined, clinicType: undefined, specialtyId: undefined, mode: "in_person" };
 
 function Column({ title, all, items }: { title: string; all: string; items: { key: string; label: string; query: Partial<Query> }[] }) {
-  const { runSearch } = useApp();
+  const { runSearch, homeHref } = useApp();
   return (
     <div className="footer-col">
       <h3>{title}</h3>
@@ -23,7 +23,7 @@ function Column({ title, all, items }: { title: string; all: string; items: { ke
           </li>
         ))}
         <li>
-          <a href="#directory" className="footer-all">
+          <a href={homeHref("#directory")} className="footer-all">
             {all}
           </a>
         </li>
@@ -33,7 +33,7 @@ function Column({ title, all, items }: { title: string; all: string; items: { ke
 }
 
 export function Footer() {
-  const { t, lang, setLang, dir, notify } = useApp();
+  const { t, lang, setLang, dir, notify, onHome, homeHref } = useApp();
   const f = t.footer;
   const soon = (what: string) => () => notify(t.common.soonTitle(what), t.common.soonBody);
 
@@ -63,7 +63,7 @@ export function Footer() {
       <div className="container">
         <div className="footer-top">
           <div className="footer-brand">
-            <a href="#top" className="brand" aria-label={t.nav.home}>
+            <a href={onHome ? "#top" : "/"} className="brand" aria-label={t.nav.home}>
               <Logo />
             </a>
             <p>{f.tagline}</p>
@@ -74,7 +74,7 @@ export function Footer() {
             <h3>{f.company}</h3>
             <ul>
               <li>
-                <a href="#pro">{f.links.pros}</a>
+                <a href={homeHref("#pro")}>{f.links.pros}</a>
               </li>
               <li>
                 <button type="button" onClick={soon(f.links.about)}>
@@ -92,7 +92,7 @@ export function Footer() {
                 </button>
               </li>
               <li>
-                <a href="#privacy">{f.links.privacy}</a>
+                <a href={homeHref("#privacy")}>{f.links.privacy}</a>
               </li>
               <li>
                 <button type="button" onClick={soon(f.links.cookies)}>
@@ -100,7 +100,7 @@ export function Footer() {
                 </button>
               </li>
               <li>
-                <a href="#faq">{f.links.help}</a>
+                <a href={homeHref("#faq")}>{f.links.help}</a>
               </li>
             </ul>
           </div>

@@ -1,12 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { dayKey, formatPrice, formatTime, relativeDay } from "@/lib/format";
-import { cityName, displayName, initials, matches, prefixMatch, specialtyName } from "@/lib/search";
+import { profileDicts } from "@/lib/profileText";
+import { cityName, displayName, initials, matches, prefixMatch, profileHref, specialtyName } from "@/lib/search";
 import { languageNames } from "@/lib/taxonomy";
 import type { Practitioner, Slot } from "@/lib/types";
 import { useApp } from "./AppContext";
-import { CloseIcon, LanguagesIcon, PinIcon, SunIcon, VideoIcon } from "./Icons";
+import { ArrowRightIcon, CloseIcon, LanguagesIcon, PinIcon, SunIcon, VideoIcon } from "./Icons";
 
 const PAGE = 6;
 
@@ -26,7 +28,11 @@ function DocCard({ p, slots }: { p: Practitioner; slots: Slot[] }) {
           {initials(p.full_name)}
         </span>
         <div>
-          <p className="doc-name">{displayName(p)}</p>
+          <p className="doc-name">
+            <Link href={profileHref(p.id)} className="doc-link">
+              {displayName(p)}
+            </Link>
+          </p>
           <p className="doc-meta">{specialtyName(idx.specialtyById.get(p.specialty_id), lang, p.gender)}</p>
         </div>
       </div>
@@ -83,6 +89,10 @@ function DocCard({ p, slots }: { p: Practitioner; slots: Slot[] }) {
           <p className="today-none">{t.available.noSlots}</p>
         )}
       </div>
+      <Link href={profileHref(p.id)} className="link card-profile">
+        {profileDicts[lang].viewProfile}
+        <ArrowRightIcon width={16} height={16} />
+      </Link>
     </li>
   );
 }

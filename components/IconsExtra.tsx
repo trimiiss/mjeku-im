@@ -63,3 +63,23 @@ export const FlaskIcon = (p: P) => (
     <path d="M7 15h10" />
   </Svg>
 );
+
+export const AwardIcon = (p: P) => (
+  <Svg {...p}>
+    <circle cx="12" cy="9" r="6" />
+    <path d="m8.6 13.9-1.6 7.1 5-2.8 5 2.8-1.6-7.1" />
+  </Svg>
+);
+
+export const ClockIcon = (p: P) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </Svg>
+);
+
+export const ExternalIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+  </Svg>
+);

@@ -148,3 +148,49 @@ export function initials(name: string) {
     .join("")
     .toUpperCase();
 }
+
+/** Link to a practitioner's profile page. */
+export const profileHref = (id: string) => `/mjeku/${encodeURIComponent(id)}`;
+
+/** Home page link that opens the results for a search, e.g. "/?s=dentist&c=prishtine#available". */
+export function queryHref(q: Partial<Query>) {
+  const sp = new URLSearchParams();
+  if (q.specialtyId) sp.set("s", q.specialtyId);
+  if (q.clinicType) sp.set("t", q.clinicType);
+  if (q.mode === "video") sp.set("m", "video");
+  else if (q.cityId) sp.set("c", q.cityId);
+  else if (q.city?.trim()) sp.set("city", q.city.trim());
+  if (q.label) sp.set("l", q.label);
+  else if (q.q?.trim()) sp.set("q", q.q.trim());
+  const s = sp.toString();
+  return `/${s ? `?${s}` : ""}#available`;
+}
+
+type Params = Record<string, string | string[] | undefined>;
+
+/** Reads a search from the home page URL (see queryHref). Unknown ids are ignored. */
+export function parseQuery(params: Params, d: Directory, lang: Lang): Query | null {
+  const get = (k: string) => {
+    const v = params[k];
+    const s = Array.isArray(v) ? v[0] : v;
+    return typeof s === "string" ? s.trim().slice(0, 80) : "";
+  };
+  const specialty = d.specialties.find((s) => s.id === get("s"));
+  const city = d.cities.find((c) => c.id === get("c"));
+  const clinicType = clinicTypes[get("t")] ? get("t") : undefined;
+  const mode = get("m") === "video" ? "video" : "in_person";
+  const label = get("l") || (specialty ? specialtyName(specialty, lang) : clinicType ? clinicTypes[clinicType][lang] : "");
+  const text = get("q");
+  const cityText = get("city");
+
+  if (!specialty && !city && !clinicType && !label && !text && !cityText && mode !== "video") return null;
+  return {
+    q: label || text,
+    city: city ? cityName(city, lang) : cityText,
+    mode,
+    specialtyId: specialty?.id,
+    cityId: city?.id,
+    clinicType,
+    label: label || undefined,
+  };
+}

@@ -32,47 +32,47 @@ insert into public.specialties (id, name_sq, name_sq_f, name_en, keywords, sort)
   ('lab', 'Laborator', 'Laborator', 'Laboratory', 'analiza gjak test urine laboratori', 15)
 on conflict (id) do nothing;
 
-insert into public.clinics (id, name, type, city_id, neighborhood) values
-  ('ulpiana-med', 'Poliklinika Ulpiana Med', 'polyclinic', 'prishtine', 'Ulpiana'),
-  ('buzeqeshja', 'Ordinanca Dentare Buzëqeshja', 'dental', 'prishtine', 'Qendër'),
-  ('ylberi', 'Qendra Pediatrike Ylberi', 'pediatric', 'prishtine', 'Dardania'),
-  ('levizja', 'Fizio Lëvizja', 'physio', 'prishtine', 'Kodra e Diellit'),
-  ('qetesia', 'Qendra Psikologjike Qetësia', 'psychology', 'prishtine', 'Arbëria'),
-  ('qeliza', 'Laboratori Qeliza', 'lab', 'prishtine', 'Lakrishtë'),
-  ('kalaja', 'Klinika Kalaja', 'polyclinic', 'prizren', 'Qendra historike'),
-  ('rugova', 'Ordinanca Rugova', 'practice', 'peje', 'Qendër'),
-  ('carshia', 'Poliklinika Çarshia', 'polyclinic', 'gjakove', 'Çarshia e Madhe'),
-  ('syri-kalter', 'Klinika e Syve Syri i Kaltër', 'eye', 'gjakove', 'Qendër'),
-  ('ibri', 'Ordinanca Ibri', 'practice', 'mitrovice', 'Qendër'),
-  ('nerodime', 'Klinika Nerodime', 'polyclinic', 'ferizaj', 'Qendër'),
-  ('anamorava', 'Ordinanca Anamorava', 'practice', 'gjilan', 'Qendër'),
-  ('llapi', 'Ordinanca Llapi', 'practice', 'podujeve', 'Qendër'),
-  ('ura-e-gurit', 'Ordinanca Ura e Gurit', 'practice', 'vushtrri', 'Qendër'),
-  ('nutri-balanca', 'Studio Nutri Balanca', 'nutrition', 'fushe-kosove', 'Qendër')
+insert into public.clinics (id, name, type, city_id, neighborhood, postal_code, lat, lng) values
+  ('ulpiana-med', 'Poliklinika Ulpiana Med', 'polyclinic', 'prishtine', 'Ulpiana', '10000', 42.6528, 21.1705),
+  ('buzeqeshja', 'Ordinanca Dentare Buzëqeshja', 'dental', 'prishtine', 'Qendër', '10000', 42.6619, 21.1638),
+  ('ylberi', 'Qendra Pediatrike Ylberi', 'pediatric', 'prishtine', 'Dardania', '10000', 42.6507, 21.1583),
+  ('levizja', 'Fizio Lëvizja', 'physio', 'prishtine', 'Kodra e Diellit', '10000', 42.6598, 21.1817),
+  ('qetesia', 'Qendra Psikologjike Qetësia', 'psychology', 'prishtine', 'Arbëria', '10000', 42.6703, 21.1502),
+  ('qeliza', 'Laboratori Qeliza', 'lab', 'prishtine', 'Lakrishtë', '10000', 42.6504, 21.1546),
+  ('kalaja', 'Klinika Kalaja', 'polyclinic', 'prizren', 'Qendra historike', '20000', 42.2093, 20.7416),
+  ('rugova', 'Ordinanca Rugova', 'practice', 'peje', 'Qendër', '30000', 42.6593, 20.2887),
+  ('carshia', 'Poliklinika Çarshia', 'polyclinic', 'gjakove', 'Çarshia e Madhe', '50000', 42.3833, 20.4285),
+  ('syri-kalter', 'Klinika e Syve Syri i Kaltër', 'eye', 'gjakove', 'Qendër', '50000', 42.3804, 20.4309),
+  ('ibri', 'Ordinanca Ibri', 'practice', 'mitrovice', 'Qendër', '40000', 42.8826, 20.8677),
+  ('nerodime', 'Klinika Nerodime', 'polyclinic', 'ferizaj', 'Qendër', '70000', 42.3702, 21.1553),
+  ('anamorava', 'Ordinanca Anamorava', 'practice', 'gjilan', 'Qendër', '60000', 42.4635, 21.4694),
+  ('llapi', 'Ordinanca Llapi', 'practice', 'podujeve', 'Qendër', '11000', 42.9106, 21.1932),
+  ('ura-e-gurit', 'Ordinanca Ura e Gurit', 'practice', 'vushtrri', 'Qendër', '42000', 42.8231, 20.9675),
+  ('nutri-balanca', 'Studio Nutri Balanca', 'nutrition', 'fushe-kosove', 'Qendër', '12000', 42.6364, 21.0922)
 on conflict (id) do nothing;
 
-insert into public.practitioners (id, title, full_name, gender, specialty_id, clinic_id, languages, offers_video, open_saturday, price_eur, price_from, duration_min, featured) values
-  ('arta-krasniqi', 'Dr.', 'Arta Krasniqi', 'f', 'gp', 'ulpiana-med', array['sq', 'en', 'de']::text[], true, true, 20, false, 20, true),
-  ('blerim-hoxha', 'Dr.', 'Blerim Hoxha', 'm', 'cardiologist', 'ulpiana-med', array['sq', 'en']::text[], true, false, 35, false, 30, false),
-  ('merita-kelmendi', 'Dr.', 'Merita Kelmendi', 'f', 'gynecologist', 'ulpiana-med', array['sq', 'en', 'de']::text[], false, true, 30, false, 30, false),
-  ('valon-rexhepi', 'Dr.', 'Valon Rexhepi', 'm', 'dermatologist', 'ulpiana-med', array['sq', 'en', 'tr']::text[], true, false, 30, false, 20, false),
-  ('dafina-berisha', 'Dr. stom.', 'Dafina Berisha', 'f', 'dentist', 'buzeqeshja', array['sq', 'en', 'de']::text[], false, true, 15, false, 30, false),
-  ('erion-gashi', 'Dr.', 'Erion Gashi', 'm', 'pediatrician', 'ylberi', array['sq', 'en']::text[], true, true, 25, false, 20, false),
-  ('lirie-shala', '', 'Lirie Shala', 'f', 'physiotherapist', 'levizja', array['sq', 'en']::text[], false, true, 20, false, 45, false),
-  ('teuta-morina', '', 'Teuta Morina, MSc', 'f', 'psychologist', 'qetesia', array['sq', 'en', 'de']::text[], true, false, 30, false, 50, false),
-  ('laboratori-qeliza', '', 'Laboratori Qeliza', null, 'lab', 'qeliza', array['sq', 'en']::text[], false, true, 5, true, 15, false),
-  ('driton-bytyqi', 'Dr.', 'Driton Bytyqi', 'm', 'gp', 'kalaja', array['sq', 'tr', 'de', 'en']::text[], true, true, 15, false, 20, false),
-  ('elife-shehu', 'Dr.', 'Elife Shehu', 'f', 'ophthalmologist', 'kalaja', array['sq', 'tr', 'en']::text[], false, false, 25, false, 20, false),
-  ('agon-dreshaj', 'Dr.', 'Agon Dreshaj', 'm', 'orthopedist', 'rugova', array['sq', 'en', 'de']::text[], false, false, 30, false, 30, false),
-  ('donika-lajci', 'Dr.', 'Donika Lajçi', 'f', 'gp', 'rugova', array['sq', 'en']::text[], true, true, 15, false, 20, false),
-  ('besa-kryeziu', 'Dr. stom.', 'Besa Kryeziu', 'f', 'dentist', 'carshia', array['sq', 'en', 'it']::text[], false, true, 15, false, 30, false),
-  ('fisnik-hasani', 'Dr.', 'Fisnik Hasani', 'm', 'ophthalmologist', 'syri-kalter', array['sq', 'en']::text[], false, false, 25, false, 20, false),
-  ('ilir-beqiri', 'Dr.', 'Ilir Beqiri', 'm', 'internist', 'ibri', array['sq', 'en', 'sr']::text[], true, false, 20, false, 20, false),
-  ('kaltrina-bajrami', 'Dr.', 'Kaltrina Bajrami', 'f', 'pediatrician', 'nerodime', array['sq', 'en', 'de']::text[], false, true, 20, false, 20, false),
-  ('mentor-ramadani', 'Dr.', 'Mentor Ramadani', 'm', 'ent', 'anamorava', array['sq', 'en']::text[], false, false, 25, false, 20, false),
-  ('shpresa-hyseni', 'Dr.', 'Shpresa Hyseni', 'f', 'gp', 'llapi', array['sq']::text[], false, true, 15, false, 20, false),
-  ('granit-zeqiri', 'Dr.', 'Granit Zeqiri', 'm', 'neurologist', 'ura-e-gurit', array['sq', 'en']::text[], true, false, 30, false, 30, false),
-  ('arbnora-salihu', '', 'Arbnora Salihu, MSc', 'f', 'nutritionist', 'nutri-balanca', array['sq', 'en']::text[], true, false, 25, false, 45, false)
+insert into public.practitioners (id, title, full_name, gender, specialty_id, clinic_id, languages, offers_video, open_saturday, price_eur, price_from, duration_min, years_experience, accepts_new_patients, featured) values
+  ('arta-krasniqi', 'Dr.', 'Arta Krasniqi', 'f', 'gp', 'ulpiana-med', array['sq', 'en', 'de']::text[], true, true, 20, false, 20, 12, true, true),
+  ('blerim-hoxha', 'Dr.', 'Blerim Hoxha', 'm', 'cardiologist', 'ulpiana-med', array['sq', 'en']::text[], true, false, 35, false, 30, 18, true, false),
+  ('merita-kelmendi', 'Dr.', 'Merita Kelmendi', 'f', 'gynecologist', 'ulpiana-med', array['sq', 'en', 'de']::text[], false, true, 30, false, 30, 15, true, false),
+  ('valon-rexhepi', 'Dr.', 'Valon Rexhepi', 'm', 'dermatologist', 'ulpiana-med', array['sq', 'en', 'tr']::text[], true, false, 30, false, 20, 9, true, false),
+  ('dafina-berisha', 'Dr. stom.', 'Dafina Berisha', 'f', 'dentist', 'buzeqeshja', array['sq', 'en', 'de']::text[], false, true, 15, false, 30, 8, true, false),
+  ('erion-gashi', 'Dr.', 'Erion Gashi', 'm', 'pediatrician', 'ylberi', array['sq', 'en']::text[], true, true, 25, false, 20, 11, true, false),
+  ('lirie-shala', '', 'Lirie Shala', 'f', 'physiotherapist', 'levizja', array['sq', 'en']::text[], false, true, 20, false, 45, 7, true, false),
+  ('teuta-morina', '', 'Teuta Morina, MSc', 'f', 'psychologist', 'qetesia', array['sq', 'en', 'de']::text[], true, false, 30, false, 50, 10, true, false),
+  ('laboratori-qeliza', '', 'Laboratori Qeliza', null, 'lab', 'qeliza', array['sq', 'en']::text[], false, true, 5, true, 15, 14, true, false),
+  ('driton-bytyqi', 'Dr.', 'Driton Bytyqi', 'm', 'gp', 'kalaja', array['sq', 'tr', 'de', 'en']::text[], true, true, 15, false, 20, 16, true, false),
+  ('elife-shehu', 'Dr.', 'Elife Shehu', 'f', 'ophthalmologist', 'kalaja', array['sq', 'tr', 'en']::text[], false, false, 25, false, 20, 13, true, false),
+  ('agon-dreshaj', 'Dr.', 'Agon Dreshaj', 'm', 'orthopedist', 'rugova', array['sq', 'en', 'de']::text[], false, false, 30, false, 30, 12, true, false),
+  ('donika-lajci', 'Dr.', 'Donika Lajçi', 'f', 'gp', 'rugova', array['sq', 'en']::text[], true, true, 15, false, 20, 6, true, false),
+  ('besa-kryeziu', 'Dr. stom.', 'Besa Kryeziu', 'f', 'dentist', 'carshia', array['sq', 'en', 'it']::text[], false, true, 15, false, 30, 10, true, false),
+  ('fisnik-hasani', 'Dr.', 'Fisnik Hasani', 'm', 'ophthalmologist', 'syri-kalter', array['sq', 'en']::text[], false, false, 25, false, 20, 9, true, false),
+  ('ilir-beqiri', 'Dr.', 'Ilir Beqiri', 'm', 'internist', 'ibri', array['sq', 'en', 'sr']::text[], true, false, 20, false, 20, 20, true, false),
+  ('kaltrina-bajrami', 'Dr.', 'Kaltrina Bajrami', 'f', 'pediatrician', 'nerodime', array['sq', 'en', 'de']::text[], false, true, 20, false, 20, 8, true, false),
+  ('mentor-ramadani', 'Dr.', 'Mentor Ramadani', 'm', 'ent', 'anamorava', array['sq', 'en']::text[], false, false, 25, false, 20, 17, true, false),
+  ('shpresa-hyseni', 'Dr.', 'Shpresa Hyseni', 'f', 'gp', 'llapi', array['sq']::text[], false, true, 15, false, 20, 22, true, false),
+  ('granit-zeqiri', 'Dr.', 'Granit Zeqiri', 'm', 'neurologist', 'ura-e-gurit', array['sq', 'en']::text[], true, false, 30, false, 30, 11, true, false),
+  ('arbnora-salihu', '', 'Arbnora Salihu, MSc', 'f', 'nutritionist', 'nutri-balanca', array['sq', 'en']::text[], true, false, 25, false, 45, 5, true, false)
 on conflict (id) do nothing;
 
 -- Opening hours: the same hours Monday to Friday, plus Saturday where open.

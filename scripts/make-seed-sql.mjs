@@ -20,10 +20,11 @@ const hours = seed.practitioners
 
 const cityCols = ["id", "name_sq", "name_en", "aliases", "sort"];
 const specCols = ["id", "name_sq", "name_sq_f", "name_en", "keywords", "sort"];
-const clinicCols = ["id", "name", "type", "city_id", "neighborhood"];
+const clinicCols = ["id", "name", "type", "city_id", "neighborhood", "postal_code", "lat", "lng"];
 const prCols = [
   "id", "title", "full_name", "gender", "specialty_id", "clinic_id", "languages",
-  "offers_video", "open_saturday", "price_eur", "price_from", "duration_min", "featured",
+  "offers_video", "open_saturday", "price_eur", "price_from", "duration_min", "years_experience",
+  "accepts_new_patients", "featured",
 ];
 
 const sql = `-- Demo data for Mjeku.Im (Kosovo). Generated from lib/seed.json by scripts/make-seed-sql.mjs.

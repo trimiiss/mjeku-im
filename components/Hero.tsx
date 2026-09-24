@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { addDaysKey, dayKey, formatPrice, formatTime, relativeDay, shortDate } from "@/lib/format";
-import { cityName, displayName, initials, specialtyName, suggest, type Suggestion } from "@/lib/search";
+import { profileDicts } from "@/lib/profileText";
+import { cityName, displayName, initials, profileHref, specialtyName, suggest, type Suggestion } from "@/lib/search";
 import { heroChips, languageNames } from "@/lib/taxonomy";
 import type { Slot } from "@/lib/types";
 import { useApp } from "./AppContext";
@@ -20,6 +23,7 @@ import {
 
 function SearchPanel() {
   const { t, lang, dir, idx, mode, setMode, draft, setDraft, runSearch, registerSearchInput } = useApp();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const listId = useId();
@@ -41,6 +45,10 @@ function SearchPanel() {
   const choose = (s: Suggestion) => {
     setOpen(false);
     setActive(-1);
+    if (s.kind === "practitioner") {
+      router.push(profileHref(s.id));
+      return;
+    }
     if (s.kind === "specialty") {
       setDraft({ q: s.label, specialtyId: s.id, label: s.label, clinicType: undefined });
       if (mode === "in_person" && !draft.city.trim()) {
@@ -234,9 +242,17 @@ function SlotCard() {
           {initials(doc.full_name)}
         </span>
         <div>
-          <p className="doc-name">{displayName(doc)}</p>
+          <p className="doc-name">
+            <Link href={profileHref(doc.id)} className="doc-link">
+              {displayName(doc)}
+            </Link>
+          </p>
           <p className="doc-meta">{specialtyName(idx.specialtyById.get(doc.specialty_id), lang, doc.gender)}</p>
         </div>
+        <Link href={profileHref(doc.id)} className="profile-mini">
+          <span>{profileDicts[lang].viewProfile}</span>
+          <ArrowRightIcon width={15} height={15} />
+        </Link>
       </div>
 
       <ul className="doc-facts">

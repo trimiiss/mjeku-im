@@ -12,7 +12,16 @@ export type Specialty = {
   sort: number;
 };
 
-export type Clinic = { id: string; name: string; type: string; city_id: string; neighborhood: string | null };
+export type Clinic = {
+  id: string;
+  name: string;
+  type: string;
+  city_id: string;
+  neighborhood: string | null;
+  postal_code: string | null;
+  lat: number | null;
+  lng: number | null;
+};
 
 export type Practitioner = {
   id: string;
@@ -27,8 +36,13 @@ export type Practitioner = {
   price_eur: number | null;
   price_from: boolean;
   duration_min: number;
+  years_experience: number | null;
+  accepts_new_patients: boolean;
   featured: boolean;
 };
+
+/** Weekly opening hours. weekday: 1 = Monday ... 7 = Sunday. Times are "HH:MM" or "HH:MM:SS". */
+export type Schedule = { weekday: number; start_time: string; end_time: string };
 
 export type Slot = { id: number; practitioner_id: string; starts_at: string; duration_min: number };
 
@@ -59,6 +73,7 @@ export type BookingInput = {
   note: string;
   mode: Mode;
   lang: Lang;
+  reason?: string;
 };
 
 export type BookingError =

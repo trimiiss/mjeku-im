@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { dictionaries, type Dict } from "@/lib/i18n";
-import { buildIndex, type Index } from "@/lib/search";
+import { buildIndex, queryHref, type Index } from "@/lib/search";
 import type { Directory, Lang, Mode, Query, Slot } from "@/lib/types";
 import { CloseIcon, InfoIcon } from "./Icons";
 
@@ -28,11 +28,16 @@ type Ctx = {
   focusSearch: () => void;
   registerSearchInput: (el: HTMLInputElement | null) => void;
   bookingSlot: Slot | null;
-  openBooking: (slot: Slot) => void;
+  bookingReason: string | null;
+  openBooking: (slot: Slot, opts?: { reason?: string }) => void;
   closeBooking: () => void;
   manageOpen: boolean;
   setManageOpen: (open: boolean) => void;
   refresh: () => void;
+  /** True on the home page, where the in-page anchors (#faq, #pro, ...) live. */
+  onHome: boolean;
+  /** "#faq" on the home page, "/#faq" everywhere else. */
+  homeHref: (hash: string) => string;
 };
 
 const AppCtx = createContext<Ctx | null>(null);
@@ -55,19 +60,34 @@ export function AppProvider({
   initialLang,
   directory,
   todayKey,
+  initialQuery = null,
 }: {
   children: ReactNode;
   initialLang: Lang;
   directory: Directory;
   todayKey: string;
+  initialQuery?: Query | null;
 }) {
   const router = useRouter();
+  const onHome = usePathname() === "/";
   const [lang, setLangState] = useState<Lang>(initialLang);
-  const [mode, setMode] = useState<Mode>("in_person");
-  const [draft, setDraftState] = useState<Draft>({ q: "", city: "" });
-  const [applied, setApplied] = useState<Query | null>(null);
+  const [mode, setMode] = useState<Mode>(initialQuery?.mode ?? "in_person");
+  const [draft, setDraftState] = useState<Draft>(() =>
+    initialQuery
+      ? {
+          q: initialQuery.q,
+          city: initialQuery.city,
+          specialtyId: initialQuery.specialtyId,
+          cityId: initialQuery.cityId,
+          clinicType: initialQuery.clinicType,
+          label: initialQuery.label,
+        }
+      : { q: "", city: "" },
+  );
+  const [applied, setApplied] = useState<Query | null>(initialQuery);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [bookingSlot, setBookingSlot] = useState<Slot | null>(null);
+  const [bookingReason, setBookingReason] = useState<string | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -93,6 +113,11 @@ export function AppProvider({
         clinicType: q && "clinicType" in q ? q.clinicType : draft.clinicType,
         label: q && "label" in q ? q.label : draft.label,
       };
+      if (!onHome) {
+        // The results list lives on the home page.
+        router.push(queryHref(next));
+        return;
+      }
       if (q?.mode) setMode(q.mode);
       setDraftState({
         q: next.q,
@@ -103,28 +128,40 @@ export function AppProvider({
         label: next.label,
       });
       setApplied(next);
+      // Keep the address shareable: /?s=dentist&c=prishtine#available
+      window.history.replaceState(null, "", queryHref(next));
       requestAnimationFrame(() => scrollToId("available"));
     },
-    [draft, mode],
+    [draft, mode, onHome, router],
   );
 
   const clearSearch = useCallback(() => {
     setApplied(null);
     setDraftState({ q: "", city: "" });
+    if (window.location.search) window.history.replaceState(null, "", "/");
   }, []);
 
   const notify = useCallback((title: string, body?: string) => setNotice({ title, body, id: Date.now() }), []);
 
   const focusSearch = useCallback(() => {
+    if (!onHome) {
+      router.push("/#top");
+      return;
+    }
     scrollToId("top");
     window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 250);
-  }, []);
+  }, [onHome, router]);
+
+  const homeHref = useCallback((hash: string) => (onHome ? hash : `/${hash}`), [onHome]);
 
   const registerSearchInput = useCallback((el: HTMLInputElement | null) => {
     inputRef.current = el;
   }, []);
 
-  const openBooking = useCallback((slot: Slot) => setBookingSlot(slot), []);
+  const openBooking = useCallback((slot: Slot, opts?: { reason?: string }) => {
+    setBookingReason(opts?.reason ?? null);
+    setBookingSlot(slot);
+  }, []);
   const closeBooking = useCallback(() => setBookingSlot(null), []);
   const refresh = useCallback(() => router.refresh(), [router]);
 
@@ -153,11 +190,14 @@ export function AppProvider({
       focusSearch,
       registerSearchInput,
       bookingSlot,
+      bookingReason,
       openBooking,
       closeBooking,
       manageOpen,
       setManageOpen,
       refresh,
+      onHome,
+      homeHref,
     }),
     [
       lang,
@@ -176,10 +216,13 @@ export function AppProvider({
       focusSearch,
       registerSearchInput,
       bookingSlot,
+      bookingReason,
       openBooking,
       closeBooking,
       manageOpen,
       refresh,
+      onHome,
+      homeHref,
     ],
   );
 

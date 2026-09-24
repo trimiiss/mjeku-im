@@ -32,7 +32,7 @@ function LangToggle() {
 }
 
 export function Header() {
-  const { t, focusSearch, setManageOpen } = useApp();
+  const { t, focusSearch, setManageOpen, onHome, homeHref } = useApp();
   const [menuOpen, setMenuOpen] = useState(false);
   const close = () => setMenuOpen(false);
 
@@ -46,7 +46,7 @@ export function Header() {
       <p className="demo-banner">{t.demoBanner}</p>
       <header className="site-header">
         <div className="container header-inner">
-          <a href="#top" className="brand" aria-label={t.nav.home}>
+          <a href={onHome ? "#top" : "/"} className="brand" aria-label={t.nav.home}>
             <Logo />
           </a>
 
@@ -55,9 +55,9 @@ export function Header() {
               <SearchIcon width={17} height={17} />
               {t.nav.search}
             </button>
-            <a href="#video">{t.nav.video}</a>
-            <a href="#pro">{t.nav.pros}</a>
-            <a href="#faq">{t.nav.help}</a>
+            <a href={homeHref("#video")}>{t.nav.video}</a>
+            <a href={homeHref("#pro")}>{t.nav.pros}</a>
+            <a href={homeHref("#faq")}>{t.nav.help}</a>
           </nav>
 
           <div className="header-actions">
@@ -90,13 +90,13 @@ export function Header() {
             >
               {t.nav.search}
             </button>
-            <a href="#video" onClick={close}>
+            <a href={homeHref("#video")} onClick={close}>
               {t.nav.video}
             </a>
-            <a href="#pro" onClick={close}>
+            <a href={homeHref("#pro")} onClick={close}>
               {t.nav.pros}
             </a>
-            <a href="#faq" onClick={close}>
+            <a href={homeHref("#faq")} onClick={close}>
               {t.nav.help}
             </a>
             <button type="button" className="btn btn-primary" onClick={myBooking}>
