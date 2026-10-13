@@ -9,7 +9,7 @@ const icons = [ChartDownIcon, ClockPlusIcon, RocketIcon, HeartChatIcon];
 
 /** On the home page it links to /per-mjeket; on that page (asPage) it is the page's heading block. */
 export function ForPractitioners({ asPage = false }: { asPage?: boolean }) {
-  const { t, notify } = useApp();
+  const { t } = useApp();
   const p = t.pro;
 
   return (
@@ -47,19 +47,19 @@ export function ForPractitioners({ asPage = false }: { asPage?: boolean }) {
 
           <div className="actions">
             {asPage ? (
-              <button type="button" className="btn btn-ink" onClick={() => notify(p.discoverSoon, p.discoverBody)}>
-                {p.discover}
+              <Link className="btn btn-ink" href={paths.account}>
+                {p.signUp}
                 <ArrowRightIcon />
-              </button>
+              </Link>
             ) : (
               <Link className="btn btn-ink" href={paths.pros}>
                 {p.discover}
                 <ArrowRightIcon />
               </Link>
             )}
-            <button type="button" className="btn btn-white" onClick={() => notify(p.demoSoon, p.demoBody)}>
-              {p.demo}
-            </button>
+            <Link className="btn btn-white" href={paths.account}>
+              {asPage ? p.signIn : p.signUp}
+            </Link>
           </div>
         </div>
 

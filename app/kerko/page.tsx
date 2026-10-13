@@ -5,7 +5,7 @@ import { currentLang } from "@/lib/lang";
 import type { Base } from "@/lib/listing";
 import { specialtyHref } from "@/lib/routes";
 import { cityName, norm } from "@/lib/search";
-import { loadListing } from "@/lib/serverData";
+import { loadListed, loadListing } from "@/lib/serverData";
 import { clinicTypes } from "@/lib/taxonomy";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +29,9 @@ async function resolve({ searchParams }: Props) {
   // Typing a specialty's exact name leads to that specialty's page.
   const specialty = q ? d.specialties.find((s) => [s.name_sq, s.name_sq_f, s.name_en].some((n) => norm(n) === norm(q))) : undefined;
   const base: Base = { kind: "search", q: q || undefined, cityId: city?.id, clinicType: type, video };
-  return { sp, lang, listing, q, city, type, video, specialty, base };
+  // For "other specialists in <city>": which specialties have listed practices there.
+  const listed = await loadListed(undefined, video ? undefined : city?.id);
+  return { sp, lang, listing, listed, q, city, type, video, specialty, base };
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -38,13 +40,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 }
 
 export default async function SearchPage(props: Props) {
-  const { sp, lang, listing, q, city, type, video, specialty, base } = await resolve(props);
+  const { sp, lang, listing, listed, q, city, type, video, specialty, base } = await resolve(props);
   if (specialty) redirect(specialtyHref(specialty.id, video ? undefined : city?.id, { video: video ? "1" : undefined }));
   const typeLabel = type ? clinicTypes[type][lang] : undefined;
   return (
     <ListingPage
       lang={lang}
       listing={listing}
+      listed={listed}
       base={base}
       params={sp}
       initialQuery={{

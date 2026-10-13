@@ -55,7 +55,7 @@ export default async function PractitionerPage({ params }: Props) {
   const now = Date.now();
   return (
     <PageShell lang={lang} directory={profile.directory} todayKey={dayKey(now)}>
-      <ProfileView practitioner={profile.practitioner} schedules={profile.schedules} clock={localNow(now)} />
+      <ProfileView practitioner={profile.practitioner} schedules={profile.schedules} clock={localNow(now)} details={profile.details} />
     </PageShell>
   );
 }

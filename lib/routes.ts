@@ -33,7 +33,12 @@ export const paths = {
   specialties: "/specialitetet",
   pros: "/per-mjeket",
   help: "/ndihme",
+  account: "/llogaria",
 };
+
+/** The practitioner account page, optionally starting from a listed practice ("this is my practice"). */
+export const accountHref = (listedPracticeId?: string) =>
+  listedPracticeId ? `${paths.account}?praktika=${encodeURIComponent(listedPracticeId)}` : paths.account;
 
 type Params = Record<string, string | undefined>;
 

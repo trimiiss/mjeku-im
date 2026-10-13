@@ -1,0 +1,314 @@
+/* ---------- Practitioner account (/llogaria) ---------- */
+
+.account-top .lede {
+  max-width: 44rem;
+  margin-top: 8px;
+}
+
+.account-body {
+  padding-block: 28px clamp(48px, 7vw, 80px);
+}
+
+.account-card {
+  display: grid;
+  gap: 16px;
+  padding: clamp(18px, 3vw, 28px);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+}
+
+.account-card h2 {
+  font-size: clamp(1.15rem, 1.05rem + 0.4vw, 1.35rem);
+  font-weight: 800;
+}
+
+.account-auth {
+  max-width: 30rem;
+  margin-inline: auto;
+}
+
+.account-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  background: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.account-tabs button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink-2);
+  font-weight: 700;
+}
+
+.account-tabs button[aria-pressed="true"] {
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: var(--shadow-soft);
+}
+
+.account-claim {
+  padding: 10px 12px;
+  background: var(--baby-50);
+  border: 1px solid var(--baby-200);
+  border-radius: 12px;
+  font-size: 0.92rem;
+}
+
+.account-switch {
+  justify-self: center;
+  border: 0;
+  background: none;
+  font-size: 0.92rem;
+}
+
+.account-dash {
+  display: grid;
+  gap: 18px;
+  max-width: 54rem;
+  margin-inline: auto;
+}
+
+.account-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.account-status {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.account-status.is-live {
+  border-color: #bfe3cf;
+  background: var(--ok-bg);
+}
+
+.account-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* ---------- Profile form ---------- */
+
+.account-form fieldset {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  margin: 0;
+  padding: 0 0 22px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.account-form > fieldset > legend {
+  margin-bottom: 14px;
+  padding: 0;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.form-wide {
+  grid-column: 1 / -1;
+}
+
+.form-field select {
+  font-size: 1rem;
+}
+
+.account-form fieldset.form-radios,
+.account-form fieldset.form-checks {
+  gap: 6px;
+  padding: 0;
+  border: 0;
+}
+
+.form-radios legend,
+.form-checks legend {
+  margin-bottom: 6px;
+  padding: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.form-radios > div,
+.form-checks > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  min-height: 46px;
+  align-items: center;
+}
+
+.form-checks-col {
+  display: grid;
+  gap: 10px;
+}
+
+.form-radios .consent,
+.form-checks .consent,
+.hours-edit .consent {
+  align-items: center;
+}
+
+.form-radios .consent input,
+.form-checks .consent input,
+.hours-edit .consent input {
+  margin-top: 0;
+}
+
+.hours-edit {
+  display: grid;
+  gap: 8px;
+}
+
+.hours-edit li {
+  display: grid;
+  grid-template-columns: minmax(8rem, 10rem) minmax(0, 9rem) auto minmax(0, 9rem);
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+}
+
+.hours-edit input[type="time"] {
+  width: 100%;
+  min-height: 42px;
+  padding: 6px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--white);
+  font: inherit;
+}
+
+.hours-edit li.is-closed input[type="time"] {
+  opacity: 0.45;
+}
+
+/* ---------- Bookings ---------- */
+
+.bk-group {
+  font-family: var(--body);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ink-2);
+}
+
+.bk-list {
+  display: grid;
+  gap: 10px;
+}
+
+.bk-list li {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.bk-list li.is-cancelled {
+  opacity: 0.6;
+}
+
+.bk-when {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+}
+
+.bk-when b {
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.bk-when span {
+  color: var(--ink-2);
+  font-size: 0.88rem;
+}
+
+.bk-who {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.bk-who > p:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.bk-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.bk-contact a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--sky-ink);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.badge--off {
+  background: #fdecec;
+  border-color: #f5c6c8;
+  color: #a4262c;
+}
+
+.bk-past summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.bk-past[open] summary {
+  margin-bottom: 10px;
+}
+
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .account-status {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hours-edit li {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    justify-content: stretch;
+  }
+
+  .hours-edit li .consent {
+    grid-column: 1 / -1;
+  }
+
+  .bk-list li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+}

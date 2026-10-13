@@ -968,3 +968,27 @@
     transition: none;
   }
 }
+
+/* Self-registered profiles not verified yet, and the practice's own contact details. */
+.profile-note {
+  margin-top: 4px;
+  padding: 8px 12px;
+  background: #fff7e6;
+  border: 1px solid #f3dcaa;
+  border-radius: 10px;
+  color: #7a5200;
+  font-size: 0.88rem;
+}
+
+.contact-lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-block: 8px;
+}
+
+.contact-lines .link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}

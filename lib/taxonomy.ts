@@ -35,6 +35,8 @@ export const clinicTypes: Record<string, { sq: string; en: string }> = {
   eye: { sq: "Klinikë e syve", en: "Eye clinic" },
   lab: { sq: "Laborator", en: "Laboratory" },
   nutrition: { sq: "Studio ushqyerjeje", en: "Nutrition studio" },
+  family_center: { sq: "Qendër e mjekësisë familjare", en: "Family medicine centre" },
+  hospital: { sq: "Spital", en: "Hospital" },
 };
 
 export const heroChips = ["gp", "dentist", "pediatrician", "gynecologist", "dermatologist", "ophthalmologist"];

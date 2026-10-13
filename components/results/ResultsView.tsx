@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
+import type { Listed } from "@/lib/directory";
 import {
   activeFilterCount,
   byAvailability,
@@ -21,6 +22,7 @@ import { languageNames } from "@/lib/taxonomy";
 import { useApp } from "../AppContext";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, CloseIcon, HouseCrossIcon, VideoIcon } from "../Icons";
 import { SearchPanel } from "../SearchPanel";
+import { ListedPractices } from "./ListedPractices";
 import { ListingSections } from "./ListingSections";
 import { ResultCard } from "./ResultCard";
 
@@ -31,14 +33,18 @@ export function ResultsView({
   base,
   nextFree,
   initialFilters,
+  listed,
 }: {
   base: Base;
   nextFree: Record<string, string>;
   initialFilters: Filters;
+  /** Real practices not on Mjeku.Im yet, for specialty and city pages. */
+  listed: Listed;
 }) {
   const { t, lang, dir, idx, todayKey } = useApp();
   const pd = pagesDicts[lang];
   const r = pd.results;
+  const l = pd.listed;
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [panelOpen, setPanelOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
@@ -68,6 +74,18 @@ export function ResultsView({
     const used = new Set(matching.flatMap((p) => p.languages));
     return Object.keys(languageNames).filter((code) => used.has(code));
   }, [matching]);
+
+  // On a specialty page without a city: every municipality with someone for it, bookable or listed.
+  const byCity = useMemo(() => {
+    if (!specialty || city || base.video) return [];
+    const counts = new Map<string, number>(Object.entries(listed.byCity));
+    for (const p of matching) {
+      const c = idx.clinicById.get(p.clinic_id)?.city_id;
+      if (c) counts.set(c, (counts.get(c) ?? 0) + 1);
+    }
+    return dir.cities.filter((c) => counts.has(c.id)).map((c) => ({ city: c, n: counts.get(c.id) ?? 0 }));
+  }, [specialty, city, base.video, listed.byCity, matching, idx, dir.cities]);
+  const listedHere = specialty && city && !base.video ? listed.practices : [];
 
   const pages = Math.max(1, Math.ceil(results.length / PAGE_SIZE));
   const page = Math.min(filters.page, pages);
@@ -208,6 +226,14 @@ export function ResultsView({
               <ResultCard key={p.id} p={p} nextFree={nextFree[p.id]} />
             ))}
           </ul>
+        ) : active === 0 && listedHere.length > 0 ? (
+          <div className="empty empty--soft">
+            <b>{l.noneOnlineTitle}</b>
+            <p className="muted">{l.noneOnlineText(listedHere.length)}</p>
+            <a className="btn btn-primary btn-sm" href="#te-tjere">
+              {l.noneOnlineCta}
+            </a>
+          </div>
         ) : (
           <div className="empty">
             <b>{r.emptyTitle}</b>
@@ -260,9 +286,29 @@ export function ResultsView({
             </button>
           </nav>
         )}
+
+        {specialty && city && listedHere.length > 0 && <ListedPractices practices={listedHere} specialty={specialty} city={city} />}
+
+        {specialty && byCity.length > 0 && (
+          <section className="listed" aria-labelledby="bycity-title">
+            <h2 id="bycity-title" className="lblock-title">
+              {l.byCity(specialtyName(specialty, lang))}
+            </h2>
+            <ul className="bycity">
+              {byCity.map(({ city: c, n }) => (
+                <li key={c.id}>
+                  <Link href={specialtyHref(specialty.id, c.id)}>
+                    <b>{cityName(c, lang)}</b>
+                    <span>{l.places(n)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
 
-      <ListingSections base={base} matching={matching} />
+      <ListingSections base={base} matching={matching} listed={listed} />
     </div>
   );
 }

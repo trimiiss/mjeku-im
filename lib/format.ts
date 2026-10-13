@@ -120,6 +120,12 @@ export function longDate(iso: string, lang: Lang) {
   return lang === "sq" ? `${day}, ${d} ${MONTHS[lang][m - 1]}` : `${day} ${d} ${MONTHS[lang][m - 1]}`;
 }
 
+/** "13 tetor 2026" / "13 October 2026", for a day key ("2026-10-13"). */
+export function fullDate(key: string, lang: Lang) {
+  const { y, m, d } = keyParts(key);
+  return `${d} ${MONTHS[lang][m - 1]} ${y}`;
+}
+
 /** "Sot" / "Nesër" / weekday name, relative to todayKey. */
 export function relativeDay(key: string, todayKey: string, lang: Lang) {
   if (key === todayKey) return lang === "sq" ? "Sot" : "Today";

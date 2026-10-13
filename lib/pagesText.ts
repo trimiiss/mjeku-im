@@ -98,6 +98,29 @@ const sq = {
     inCity: (what: string, city: string) => `${what} në ${city}`,
     otherInCity: (city: string) => `Specialistë të tjerë në ${city}`,
   },
+  listed: {
+    title: (place: string) => `Të tjerë në ${place}`,
+    lede: (n: number, specialtyId: string, nameSq: string, place: string) =>
+      `${n === 1 ? "1 vend" : `${n} vende`} në ${place} ku mund të shkosh te ${definiteSq[specialtyId] ?? nameSq.toLowerCase()}. Ende nuk pranojnë rezervime online në Mjeku.Im, ndaj telefono direkt.`,
+    area: "Lagjja ose fshati",
+    allAreas: "Të gjitha",
+    public: "Publike",
+    noPhone: "Pa numër telefoni",
+    map: "Harta",
+    website: "Faqja",
+    claim: "Kjo është klinika ime",
+    showAll: (n: number) => `Shfaq të gjitha (${n})`,
+    source: (date: string) =>
+      `Të dhënat: © kontribuesit e OpenStreetMap dhe faqet publike të klinikave, kontrolluar më ${date}. Mund të ketë gabime: konfirmo me telefon para se të shkosh.`,
+    ownerTitle: "Punon në një nga këto klinika?",
+    ownerText: "Krijo profil falas, vendos orarin dhe merr rezervime online.",
+    ownerCta: "Krijo profil",
+    noneOnlineTitle: "Ende askush këtu nuk pranon rezervime online",
+    noneOnlineText: (n: number) => `Por më poshtë ${n === 1 ? "ka 1 vend" : `ka ${n} vende`} që mund t'i telefonosh.`,
+    noneOnlineCta: "Shiko listën",
+    byCity: (what: string) => `${what} sipas komunës`,
+    places: (n: number) => (n === 1 ? "1 vend" : `${n} vende`),
+  },
   specialtyFaq: (f: SpecialtyFacts) => {
     const def = definiteSq[f.specialtyId] ?? f.nameSq.toLowerCase();
     const price =
@@ -151,13 +174,17 @@ const sq = {
     metaTitle: "Mjeku.Im Pro për mjekë dhe klinika",
     stepsTitle: "Si fillon",
     steps: [
-      { title: "Na tregoni për klinikën", text: "Specialitetet, stafi, orari dhe shërbimet që ofroni." },
-      { title: "Ne e përgatisim profilin", text: "Profili dhe kalendari online janë gati brenda disa ditësh." },
-      { title: "Pacientët rezervojnë online", text: "Ju shihni çdo rezervim në kalendar dhe pacientët marrin kujtesë me SMS." },
+      { title: "Krijo llogarinë", text: "Me email dhe fjalëkalim, falas, për një minutë." },
+      { title: "Plotëso profilin dhe orarin", text: "Specialiteti, klinika, çmimi, gjuhët dhe orët kur pranon pacientë." },
+      { title: "Pacientët rezervojnë online", text: "Çdo rezervim e sheh në llogarinë tënde, me emrin dhe telefonin e pacientit." },
     ],
     faqTitle: "Pyetje nga mjekët",
     faq: [
       { q: "Sa kushton Mjeku.Im Pro?", a: "Gjatë fazës demo është falas. Çmimet për klinikat do të publikohen para lansimit." },
+      {
+        q: "Klinika ime është tashmë në listë. Çfarë bëj?",
+        a: "Te lista e qytetit tënd kliko “Kjo është klinika ime” dhe krijo llogarinë: të dhënat plotësohen vetë. Pasi e verifikojmë, profili yt zë vendin e saj në listë.",
+      },
       { q: "A mund ta përdor me kalendarin që kam?", a: "Po, qëllimi është që rezervimet online të sinkronizohen me kalendarin e klinikës." },
       { q: "Kush i sheh të dhënat e pacientëve?", a: "Vetëm klinika ku rezervon pacienti. Të dhënat ruhen në BE, në përputhje me Ligjin Nr. 06/L-082 dhe GDPR." },
     ],
@@ -237,6 +264,29 @@ const en: PagesDict = {
     inCity: (what: string, city: string) => `${what} in ${city}`,
     otherInCity: (city: string) => `Other specialists in ${city}`,
   },
+  listed: {
+    title: (place: string) => `More in ${place}`,
+    lede: (n: number, specialtyId: string, nameEn: string, place: string) =>
+      `${n === 1 ? "1 place" : `${n} places`} in ${place} where you can see ${withArticle(nameEn, specialtyId)}. They don't take online bookings on Mjeku.Im yet, so call them directly.`,
+    area: "Neighbourhood or village",
+    allAreas: "All",
+    public: "Public",
+    noPhone: "No phone number",
+    map: "Map",
+    website: "Website",
+    claim: "This is my practice",
+    showAll: (n: number) => `Show all (${n})`,
+    source: (date: string) =>
+      `Data: © OpenStreetMap contributors and the practices' public pages, checked on ${date}. It may contain mistakes: confirm by phone before you go.`,
+    ownerTitle: "Work at one of these practices?",
+    ownerText: "Create a free profile, set your hours and take bookings online.",
+    ownerCta: "Create a profile",
+    noneOnlineTitle: "No one here takes online bookings yet",
+    noneOnlineText: (n: number) => `But there ${n === 1 ? "is 1 place" : `are ${n} places`} below you can call.`,
+    noneOnlineCta: "See the list",
+    byCity: (what: string) => `${what} by municipality`,
+    places: (n: number) => (n === 1 ? "1 place" : `${n} places`),
+  },
   specialtyFaq: (f: SpecialtyFacts) => {
     const who = withArticle(f.nameEn, f.specialtyId);
     const price =
@@ -288,13 +338,17 @@ const en: PagesDict = {
     metaTitle: "Mjeku.Im Pro for doctors and practices",
     stepsTitle: "How to get started",
     steps: [
-      { title: "Tell us about your practice", text: "Specialties, staff, opening hours and the services you offer." },
-      { title: "We set up your profile", text: "Your profile and online calendar are ready within a few days." },
-      { title: "Patients book online", text: "You see every booking in your calendar and patients get SMS reminders." },
+      { title: "Create your account", text: "With an email and password, for free, in a minute." },
+      { title: "Fill in your profile and hours", text: "Specialty, practice, price, languages and the hours you see patients." },
+      { title: "Patients book online", text: "You see every booking in your account, with the patient's name and phone number." },
     ],
     faqTitle: "Questions from practitioners",
     faq: [
       { q: "How much does Mjeku.Im Pro cost?", a: "It is free during the demo phase. Prices for practices will be published before launch." },
+      {
+        q: "My practice is already listed. What do I do?",
+        a: "In your town's list, click “This is my practice” and create your account: the details are filled in for you. Once we verify you, your profile takes its place in the list.",
+      },
       { q: "Can I use it with my current calendar?", a: "Yes, the aim is for online bookings to sync with your practice calendar." },
       { q: "Who can see patients' data?", a: "Only the practice the patient books with. Data is stored in the EU, in line with Law No. 06/L-082 and the GDPR." },
     ],

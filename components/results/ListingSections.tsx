@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { Listed } from "@/lib/directory";
 import type { Base } from "@/lib/listing";
 import { pagesDicts } from "@/lib/pagesText";
 import { specialtyInfo } from "@/lib/profileText";
@@ -36,7 +37,7 @@ function LinkBlock({ title, items, more }: { title: string; items: LinkItem[]; m
 }
 
 /** Below the results, like OneDoc: FAQ, expertises, other specialties, related and popular searches. */
-export function ListingSections({ base, matching }: { base: Base; matching: Practitioner[] }) {
+export function ListingSections({ base, matching, listed }: { base: Base; matching: Practitioner[]; listed: Listed }) {
   const { lang, dir, idx } = useApp();
   const pd = pagesDicts[lang];
   const sec = pd.sections;
@@ -82,16 +83,17 @@ export function ListingSections({ base, matching }: { base: Base; matching: Prac
     .filter((s) => s.id !== specialty?.id)
     .map((s) => ({ key: s.id, label: specialtyName(s, lang), href: specialtyHref(s.id) }));
 
-  // Cities that actually have someone for this search.
-  const cityCounts = new Map<string, number>();
+  // Cities that actually have someone for this search (bookable, or listed for the specialty).
+  const cityCounts = new Map<string, number>(base.video ? [] : Object.entries(listed.byCity));
   for (const p of dir.practitioners) {
     if (specialty && p.specialty_id !== specialty.id) continue;
     if (base.video && !p.offers_video) continue;
     const c = idx.clinicById.get(p.clinic_id)?.city_id;
     if (c) cityCounts.set(c, (cityCounts.get(c) ?? 0) + 1);
   }
+  // A specialty page without a city lists every municipality right below the results instead.
   const related: LinkItem[] = dir.cities
-    .filter((c) => cityCounts.has(c.id) && c.id !== city?.id)
+    .filter((c) => cityCounts.has(c.id) && c.id !== city?.id && !(specialty && !city && !base.video))
     .map((c) =>
       specialty
         ? {
@@ -106,13 +108,14 @@ export function ListingSections({ base, matching }: { base: Base; matching: Prac
           },
     );
 
-  // On a city page: the other specialties available in the same city.
+  // On a city page: the other specialties available in the same city (bookable or listed).
   const sameCity: LinkItem[] = city
     ? dir.specialties
         .filter(
           (s) =>
             s.id !== specialty?.id &&
-            dir.practitioners.some((p) => p.specialty_id === s.id && idx.clinicById.get(p.clinic_id)?.city_id === city.id),
+            (Boolean(listed.bySpecialty[s.id]) ||
+              dir.practitioners.some((p) => p.specialty_id === s.id && idx.clinicById.get(p.clinic_id)?.city_id === city.id)),
         )
         .map((s) => ({ key: s.id, label: sec.inCity(specialtyName(s, lang), cityLabel), href: specialtyHref(s.id, city.id) }))
     : [];

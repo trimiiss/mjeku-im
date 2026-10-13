@@ -4,7 +4,7 @@ Book a doctor, dentist or therapist in Kosovo, at the clinic or by video. Albani
 
 Live: https://mjeku-im.vercel.app
 
-> Demo: all doctors and clinics are fictional sample data, and bookings are not real appointments. The site says so in a banner at the top.
+> Demo: the bookable doctors and clinics are fictional sample data, and bookings are not real appointments. The site says so in a banner at the top. The "More in <town>" lists are real practices (see below), and doctors who sign up themselves are real accounts.
 
 ## Stack
 
@@ -27,6 +27,8 @@ Live: https://mjeku-im.vercel.app
 - A nightly job (pg_cron, 01:10 UTC) creates slots 3 weeks ahead from each doctor's opening hours.
 - Every doctor has a profile page at `/mjeku/<id>` (e.g. `/mjeku/arta-krasniqi`): summary, map and opening hours, presentation, FAQ, and a booking box with specialty, visit reason and 16 days of free times. The visit reason is saved with the booking.
 - Filters are kept in the address (e.g. `/mjek-i-familjes?gjuha=de&gjinia=f`), so a filtered list can be shared.
+- Every specialty page has a page for each of Kosovo's 38 municipalities. Below the bookable doctors, "Të tjerë në <qyteti> / More in <town>" lists the real practices, clinics and health centres there that aren't on Mjeku.Im yet, with phone, address and map, filterable by neighbourhood or village. `/stomatolog` lists every municipality with its count.
+- Doctors can create an account at `/llogaria` (Supabase Auth, email and password), fill in their profile, practice and opening hours, and appear on the site straight away with a "not verified yet" note. Free slots are created for the next 3 weeks from their hours, and they see their bookings (patient name and phone) in the account. "Kjo është klinika ime / This is my practice" on a listed practice opens the sign-up with its details filled in.
 - Without Supabase environment variables, the site runs on the same demo data from `lib/seed.json`, and bookings aren't saved.
 
 ## Run it locally
@@ -47,6 +49,8 @@ Open http://localhost:3000.
 | Page addresses (Albanian slugs) | `lib/routes.ts` |
 | Listing filters, sorting and titles | `lib/listing.ts` |
 | Demo doctors, clinics, cities, opening hours | `lib/seed.json` |
+| Real practices not on Mjeku.Im yet | `lib/listed.json` (→ `supabase/listed.sql`) |
+| Practitioner account page | `app/llogaria/`, `components/account/`, `lib/accountText.ts` |
 | Services, institution types, popular searches | `lib/taxonomy.ts` |
 | Search logic | `lib/search.ts` |
 | Dates and prices in Kosovo time | `lib/format.ts` |
@@ -67,17 +71,29 @@ Supabase project `mjeku-im` (ref `xulrcmxkpbxpsnmrpsjw`, region eu-central-1).
 - Nightly slot job: `supabase/migrations/20260924120100_daily_slots_cron.sql`
 - Profile pages (map location, experience, public opening hours, visit reason): `supabase/migrations/20260924150000_profile_page.sql` and `20260924150100_profile_demo_data.sql`
 - First free slot per doctor, for the availability filter: `supabase/migrations/20260924190000_next_free_slots.sql`
+- All 38 municipalities and the real-practice listings: `supabase/migrations/20261012120000_listed_practices.sql`
+- Practitioner accounts (`accounts` table, `my_profile`, `save_my_profile`, `my_bookings`): `supabase/migrations/20261012120100_practitioner_accounts.sql`
 - Demo data: edit `lib/seed.json`, run `node scripts/make-seed-sql.mjs`, then run `supabase/seed.sql`
 
-The demo job marks about 30% of new slots as taken so calendars look realistic. For real clinics, change it to `generate_slots(21, 0)`.
+The demo job marks about 30% of new slots as taken so calendars look realistic. Self-registered doctors never get these fake bookings.
+
+### Real practices ("More in <town>")
+
+`lib/listed.json` holds the real practices, clinics and health centres per municipality and specialty, each with its sources. The first version comes from OpenStreetMap (© OpenStreetMap contributors, ODbL; the pages credit it) and was sorted into specialties by tags and names; places whose specialty couldn't be told (most hospitals and unnamed clinics) are left out for now. To update it: edit `lib/listed.json`, run `node scripts/make-listed-sql.mjs`, then run `supabase/listed.sql` in the SQL editor. Practices removed from the JSON are hidden, not deleted.
+
+### Practitioner accounts
+
+- In Supabase → Authentication → URL Configuration, set the Site URL to `https://mjeku-im.vercel.app` and add `https://mjeku-im.vercel.app/**` and `http://localhost:3000/**` to the redirect URLs, so confirmation and password emails link back to the site.
+- Supabase's built-in email sender only delivers to members of the Supabase team. For other doctors to receive confirmation and password emails, add a custom SMTP sender (e.g. Resend) under Authentication → Emails, or turn off "Confirm email" under Authentication → Sign In / Providers → Email.
+- To verify a doctor, set `practitioners.verified = true` in the table editor. This removes the "not verified" note and, if they picked their practice from the lists, hides that listing in favour of their profile. To take a profile down, set `active = false`.
 
 ## Before going live with real patients
 
 - Add a captcha (e.g. Cloudflare Turnstile) and rate limiting to booking, or move the booking functions behind a server-only key.
 - Send confirmations and reminders by SMS or email (e.g. Twilio, Resend).
-- Add a clinic dashboard so practices manage their own hours and see their bookings.
+- Check doctors' licences before verifying them, and let a practice manage more than one doctor from one account.
 - Add a privacy policy and terms, and review them against Law No. 06/L-082 on the Protection of Personal Data.
-- Profile and listing pages are marked `noindex` because the demo doctors are fictional. Remove `robots` in `app/mjeku/[id]/page.tsx` and `components/results/ListingPage.tsx` once real practitioners are listed.
+- Profile and listing pages are marked `noindex` because the demo doctors are fictional. Remove `robots` in `app/mjeku/[id]/page.tsx` and `components/results/ListingPage.tsx` once the demo doctors are gone.
 - Add real photos (`practitioners.photo_url` is ready) and the practices' phone numbers.
 
 ## Push to GitHub

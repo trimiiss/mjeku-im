@@ -15,7 +15,7 @@ import {
 import { paths, specialtyHref } from "@/lib/routes";
 import { cityName, displayName, initials, specialtyName } from "@/lib/search";
 import { languageNames } from "@/lib/taxonomy";
-import type { Practitioner, Schedule } from "@/lib/types";
+import type { Practitioner, ProfileDetails, Schedule } from "@/lib/types";
 import { useApp } from "../AppContext";
 import {
   CheckIcon,
@@ -23,6 +23,7 @@ import {
   HeartChatIcon,
   HouseCrossIcon,
   LanguagesIcon,
+  PhoneIcon,
   PinIcon,
   PlusIcon,
   StethoscopeIcon,
@@ -129,7 +130,17 @@ function MobileBookBar({ label }: { label: string }) {
   );
 }
 
-export function ProfileView({ practitioner: p, schedules, clock }: { practitioner: Practitioner; schedules: Schedule[]; clock: Clock }) {
+export function ProfileView({
+  practitioner: p,
+  schedules,
+  clock,
+  details,
+}: {
+  practitioner: Practitioner;
+  schedules: Schedule[];
+  clock: Clock;
+  details: ProfileDetails;
+}) {
   const { t, lang, idx } = useApp();
   const pt = profileDicts[lang];
   const [bioOpen, setBioOpen] = useState(false);
@@ -145,7 +156,10 @@ export function ProfileView({ practitioner: p, schedules, clock }: { practitione
   const focus = specialtyInfo[p.specialty_id]?.focus[lang] ?? [];
   const slots = idx.slotsByPractitioner.get(p.id) ?? [];
   const languages = p.languages.map((l) => languageNames[l]?.[lang] ?? l);
-  const bio = bioParagraphs(p, spec, clinic?.name ?? "", cityLabel, lang);
+  // The practitioner's own text when they wrote one, otherwise one generated from the profile.
+  const bio = details.about
+    ? details.about.split(/\n+/).map((s) => s.trim()).filter(Boolean)
+    : bioParagraphs(p, spec, clinic?.name ?? "", cityLabel, lang);
   const status = openStatus(schedules, clock, lang);
   const week = weeklyHours(schedules);
   const place = [clinic?.neighborhood, [clinic?.postal_code, cityLabel].filter(Boolean).join(" ")].filter(Boolean).join(", ");
@@ -162,7 +176,7 @@ export function ProfileView({ practitioner: p, schedules, clock }: { practitione
     { q: pt.faq.address(name), a: `${clinic?.name ?? ""}, ${place}.` },
     { q: pt.faq.languages(name, person), a: `${capitalized(joinList(languages, lang))}.` },
     { q: pt.faq.hours(name), a: schedules.length ? `${hoursSummary(schedules, lang)}.` : pt.closed },
-    { q: pt.faq.phone(name), a: pt.faq.phoneAnswer },
+    { q: pt.faq.phone(name), a: details.phone ? pt.faq.phoneIs(details.phone) : pt.faq.phoneAnswer },
     { q: pt.faq.newPatients(name), a: p.accepts_new_patients ? pt.faq.newPatientsYes(name) : pt.faq.newPatientsNo(name) },
     { q: pt.faq.specialties(name), a: `${spec}.` },
     { q: pt.faq.expertises(name), a: `${capitalized(joinList(focus.map((f) => f.charAt(0).toLowerCase() + f.slice(1)), lang))}.` },
@@ -224,6 +238,7 @@ export function ProfileView({ practitioner: p, schedules, clock }: { practitione
                 )}
                 {p.years_experience ? <span className="badge">{pt.experience(p.years_experience)}</span> : null}
               </div>
+              {p.self_registered && !p.verified && <p className="profile-note">{pt.unverified}</p>}
             </div>
           </header>
         </div>
@@ -300,6 +315,12 @@ export function ProfileView({ practitioner: p, schedules, clock }: { practitione
                 <address>
                   <b>{clinic?.name}</b>
                   <br />
+                  {details.address && (
+                    <>
+                      {details.address}
+                      <br />
+                    </>
+                  )}
                   {clinic?.neighborhood && (
                     <>
                       {clinic.neighborhood}
@@ -310,6 +331,22 @@ export function ProfileView({ practitioner: p, schedules, clock }: { practitione
                   <br />
                   {pt.country}
                 </address>
+                {(details.phone || details.website) && (
+                  <p className="contact-lines">
+                    {details.phone && (
+                      <a className="link" href={`tel:${details.phone.replace(/[^\d+]/g, "")}`}>
+                        <PhoneIcon width={16} height={16} />
+                        {details.phone}
+                      </a>
+                    )}
+                    {details.website && (
+                      <a className="link" href={details.website} target="_blank" rel="noopener noreferrer nofollow">
+                        {pt.websiteLabel}
+                        <ExternalIcon width={16} height={16} />
+                      </a>
+                    )}
+                  </p>
+                )}
                 {hasMap && (
                   <a className="link" href={mapLink} target="_blank" rel="noopener noreferrer">
                     {pt.openInMaps}

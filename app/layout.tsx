@@ -6,6 +6,7 @@ import "./globals.css";
 import "./booking.css";
 import "./profile.css";
 import "./pages.css";
+import "./account.css";
 
 // next/font downloads these at build time and serves them from the site itself,
 // so visitors' browsers never contact Google (good for GDPR).

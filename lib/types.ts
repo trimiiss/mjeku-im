@@ -39,6 +39,31 @@ export type Practitioner = {
   years_experience: number | null;
   accepts_new_patients: boolean;
   featured: boolean;
+  /** Created by the practitioner through their account (missing in the offline demo data). */
+  self_registered?: boolean;
+  /** Checked by Mjeku.Im. Only meaningful for self-registered profiles. */
+  verified?: boolean;
+};
+
+/** Profile-page extras a practitioner can fill in through their account. */
+export type ProfileDetails = { about: string | null; address: string | null; phone: string | null; website: string | null };
+
+/** A real practice that isn't on Mjeku.Im yet: shown on listing pages with its phone, not bookable online. */
+export type ListedPractice = {
+  id: string;
+  name: string;
+  /** A key of clinicTypes in lib/taxonomy.ts. */
+  kind: string;
+  sector: "public" | "private" | null;
+  specialty_ids: string[];
+  city_id: string;
+  neighborhood: string | null;
+  address: string | null;
+  phone: string | null;
+  website: string | null;
+  lat: number | null;
+  lng: number | null;
+  checked_on: string;
 };
 
 /** Weekly opening hours. weekday: 1 = Monday ... 7 = Sunday. Times are "HH:MM" or "HH:MM:SS". */
