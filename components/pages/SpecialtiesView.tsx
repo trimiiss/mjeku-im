@@ -11,8 +11,11 @@ import { useApp } from "../AppContext";
 import { ChevronRightIcon, StethoscopeIcon } from "../Icons";
 import { FlaskIcon } from "../IconsExtra";
 
-/** /specialitetet: every specialty with its cities, then all services, institution types and cities. */
-export function SpecialtiesView() {
+/**
+ * /specialitetet: every specialty with its cities, then all services, institution types and cities.
+ * Counts both bookable doctors and the listed practices that aren't on Mjeku.Im yet.
+ */
+export function SpecialtiesView({ listedCounts }: { listedCounts: Record<string, Record<string, number>> }) {
   const { lang, dir, idx } = useApp();
   const pd = pagesDicts[lang];
   const sp = pd.specialtiesPage;
@@ -21,10 +24,13 @@ export function SpecialtiesView() {
     () =>
       dir.specialties.map((s) => {
         const people = dir.practitioners.filter((p) => p.specialty_id === s.id);
+        const listed = listedCounts[s.id] ?? {};
         const cityIds = new Set(people.map((p) => idx.clinicById.get(p.clinic_id)?.city_id).filter(Boolean) as string[]);
-        return { s, count: people.length, cities: dir.cities.filter((c) => cityIds.has(c.id)) };
+        for (const id of Object.keys(listed)) cityIds.add(id);
+        const count = people.length + Object.values(listed).reduce((a, b) => a + b, 0);
+        return { s, count, cities: dir.cities.filter((c) => cityIds.has(c.id)) };
       }),
-    [dir, idx],
+    [dir, idx, listedCounts],
   );
 
   const services = useMemo(() => {
@@ -37,8 +43,10 @@ export function SpecialtiesView() {
   }, [lang]);
 
   const types = Array.from(new Set(dir.clinics.map((c) => c.type)));
-  const citiesWithDoctors = dir.cities.filter((c) =>
-    dir.practitioners.some((p) => idx.clinicById.get(p.clinic_id)?.city_id === c.id),
+  const citiesWithDoctors = dir.cities.filter(
+    (c) =>
+      dir.practitioners.some((p) => idx.clinicById.get(p.clinic_id)?.city_id === c.id) ||
+      Object.values(listedCounts).some((byCity) => byCity[c.id]),
   );
 
   return (
@@ -101,18 +109,20 @@ export function SpecialtiesView() {
         </section>
 
         <div className="lblocks">
-          <section className="lblock" id="institucionet" aria-labelledby="types-title">
-            <h2 id="types-title" className="lblock-title">
-              {sp.institutions}
-            </h2>
-            <ul className="lblock-list">
-              {types.map((type) => (
-                <li key={type}>
-                  <Link href={searchPageHref({ type })}>{clinicTypes[type]?.[lang] ?? type}</Link>
-                </li>
-              ))}
-            </ul>
-          </section>
+          {types.length > 0 && (
+            <section className="lblock" id="institucionet" aria-labelledby="types-title">
+              <h2 id="types-title" className="lblock-title">
+                {sp.institutions}
+              </h2>
+              <ul className="lblock-list">
+                {types.map((type) => (
+                  <li key={type}>
+                    <Link href={searchPageHref({ type })}>{clinicTypes[type]?.[lang] ?? type}</Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           <section className="lblock" aria-labelledby="cities-title">
             <h2 id="cities-title" className="lblock-title">
               {sp.cityTitle}

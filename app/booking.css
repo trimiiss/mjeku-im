@@ -1,15 +1,5 @@
-/* Mjeku.Im: demo banner, language switch, booking and "my booking" dialogs.
+/* Mjeku.Im: language switch, booking and "my booking" dialogs.
    Uses the tokens defined in globals.css. */
-
-.demo-banner {
-  margin: 0;
-  padding: 8px var(--gutter);
-  background: var(--ink);
-  color: #d7ecf8;
-  font-size: 0.84rem;
-  line-height: 1.4;
-  text-align: center;
-}
 
 /* ---------- Language switch ---------- */
 
@@ -417,7 +407,7 @@
   background: #fadadb;
 }
 
-.demo-note {
+.booking-note {
   color: var(--ink-3);
   font-size: 0.8rem;
   text-align: center;

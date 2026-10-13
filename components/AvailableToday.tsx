@@ -114,6 +114,9 @@ export function AvailableToday() {
     return [...dir.practitioners].sort((a, b) => first(a).localeCompare(first(b))).slice(0, PAGE);
   }, [dir, idx]);
 
+  // Nobody takes online bookings yet: the hero invites doctors instead.
+  if (soonest.length === 0) return null;
+
   return (
     <section className="section section--mist" id="available" aria-labelledby="available-title">
       <div className="container">

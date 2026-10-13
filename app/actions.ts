@@ -34,10 +34,8 @@ export async function bookSlot(input: BookingInput): Promise<BookingResult> {
   if (phone.replace(/[^0-9]/g, "").length < 8) return { ok: false, error: "invalid_phone" };
 
   const sb = getSupabase();
-  if (!sb || !Number.isInteger(input.slotId) || input.slotId < 0) {
-    // No database configured, or the page is showing offline demo slots: pretend it worked, but say so in the UI.
-    return { ok: true, code: "MJK-DEMO00", startsAt: new Date().toISOString(), practitionerId: "", mode, offline: true };
-  }
+  if (!sb) return { ok: false, error: "unknown" };
+  if (!Number.isInteger(input.slotId) || input.slotId < 0) return { ok: false, error: "slot_unavailable" };
 
   const { data, error } = await sb.rpc("book_slot", {
     p_slot_id: input.slotId,
@@ -53,7 +51,7 @@ export async function bookSlot(input: BookingInput): Promise<BookingResult> {
 
   const row = Array.isArray(data) ? data[0] : data;
   if (!row) return { ok: false, error: "unknown" };
-  return { ok: true, code: row.code, startsAt: row.starts_at, practitionerId: row.practitioner_id, mode: row.mode, offline: false };
+  return { ok: true, code: row.code, startsAt: row.starts_at, practitionerId: row.practitioner_id, mode: row.mode };
 }
 
 export async function findBooking(code: string, phone: string): Promise<FindResult> {

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { addDaysKey, dayKey, formatPrice, formatTime, relativeDay, shortDate } from "@/lib/format";
 import { profileDicts } from "@/lib/profileText";
-import { profileHref, specialtyHref } from "@/lib/routes";
+import { paths, profileHref, specialtyHref } from "@/lib/routes";
 import { cityName, displayName, initials, specialtyName } from "@/lib/search";
 import { heroChips, languageNames } from "@/lib/taxonomy";
 import type { Slot } from "@/lib/types";
@@ -39,7 +39,7 @@ function SlotCard() {
     setPicked(null);
   }, [firstOpen, slots]);
 
-  if (!doc) return null;
+  if (!doc) return <JoinCard />;
   const current = days[day];
   const speaks = doc.languages.map((l) => languageNames[l]?.[lang] ?? l).join(", ");
 
@@ -155,6 +155,29 @@ function SlotCard() {
         ) : (
           <p>{t.slotCard.hint}</p>
         )}
+      </div>
+    </aside>
+  );
+}
+
+/** In place of the slot card while no doctor takes bookings yet: invites doctors to join. */
+function JoinCard() {
+  const { t } = useApp();
+  return (
+    <aside className="slot-card join-card" aria-labelledby="join-title">
+      <p className="eyebrow">{t.joinCard.eyebrow}</p>
+      <h2 id="join-title" className="join-title">
+        {t.joinCard.title}
+      </h2>
+      <p className="join-text">{t.joinCard.text}</p>
+      <div className="join-actions">
+        <Link href={paths.account} className="btn btn-primary">
+          {t.joinCard.cta}
+          <ArrowRightIcon />
+        </Link>
+        <Link href={paths.pros} className="link">
+          {t.joinCard.more}
+        </Link>
       </div>
     </aside>
   );

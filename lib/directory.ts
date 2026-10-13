@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { addDaysKey, dayKey, localToUtcIso } from "./format";
 import listedSeed from "./listed.json";
-import { offlineDirectory, offlineSchedules } from "./mock";
+import { offlineDirectory } from "./offline";
 import { PROFILE_DAYS } from "./profileText";
 import { getSupabase } from "./supabase";
 import type { City, Clinic, Directory, ListedPractice, Practitioner, ProfileDetails, Schedule, Slot, Specialty } from "./types";
@@ -42,7 +42,7 @@ export async function getDirectory(): Promise<Directory> {
     if (slots.error) throw slots.error;
     return { ...base, slots: (slots.data ?? []) as Slot[], source: "live" };
   } catch (err) {
-    console.error("Supabase request failed, showing offline demo data instead.", err);
+    console.error("Supabase request failed, showing no practitioners instead.", err);
     return offlineDirectory();
   }
 }
@@ -54,7 +54,7 @@ const NO_DETAILS: ProfileDetails = { about: null, address: null, phone: null, we
 /** One practitioner's profile: the directory (for names and places), their free slots and opening hours. */
 export async function getProfile(id: string): Promise<Profile | null> {
   const sb = getSupabase();
-  if (!sb) return offlineProfile(id);
+  if (!sb) return null;
 
   try {
     const now = Date.now();
@@ -89,16 +89,9 @@ export async function getProfile(id: string): Promise<Profile | null> {
       details: row ? { ...NO_DETAILS, ...row.clinics, about: row.about } : NO_DETAILS,
     };
   } catch (err) {
-    console.error("Supabase request failed, showing offline demo data instead.", err);
-    return offlineProfile(id);
+    console.error("Supabase request failed, can't show this profile.", err);
+    return null;
   }
-}
-
-function offlineProfile(id: string): Profile | null {
-  const directory = offlineDirectory({ days: PROFILE_DAYS, perDay: 99, practitionerId: id });
-  const practitioner = directory.practitioners.find((p) => p.id === id);
-  if (!practitioner) return null;
-  return { directory, practitioner, schedules: offlineSchedules(id), details: NO_DETAILS };
 }
 
 /** Directory plus the first free slot of every practitioner (for availability filters and sorting). */
@@ -117,9 +110,8 @@ export async function getListing(): Promise<Listing> {
     return { directory, nextFree };
   }
 
-  // Offline, or the function failed: look two weeks ahead in the demo data, or use the slots already loaded.
-  const source = directory.source === "offline" ? offlineDirectory({ days: PROFILE_DAYS, perDay: 1 }).slots : directory.slots;
-  for (const s of source) if (!nextFree[s.practitioner_id]) nextFree[s.practitioner_id] = s.starts_at;
+  // The function failed: use the slots already loaded.
+  for (const s of directory.slots) if (!nextFree[s.practitioner_id]) nextFree[s.practitioner_id] = s.starts_at;
   return { directory, nextFree };
 }
 
@@ -178,6 +170,25 @@ function offlineListed(specialtyId?: string, cityId?: string): Listed {
     byCity: countBy(forSpecialty.map((p) => p.city_id)),
     bySpecialty: cityId ? countBy(all.filter((p) => p.city_id === cityId).flatMap((p) => p.specialty_ids)) : {},
   };
+}
+
+/** For every specialty, how many listed practices each city has (the specialties page). */
+export async function getListedCounts(): Promise<Record<string, Record<string, number>>> {
+  const sb = getSupabase();
+  let rows = listedSeed as unknown as Pick<ListedPractice, "specialty_ids" | "city_id">[];
+  if (sb) {
+    const { data, error } = await sb.from("open_listed_practices").select("specialty_ids, city_id").limit(5000);
+    if (!error) rows = (data ?? []) as typeof rows;
+    else console.error("Supabase request failed, counting the bundled listed practices instead.", error);
+  }
+  const out: Record<string, Record<string, number>> = {};
+  for (const r of rows) {
+    for (const s of r.specialty_ids) {
+      const byCity = (out[s] ??= {});
+      byCity[r.city_id] = (byCity[r.city_id] ?? 0) + 1;
+    }
+  }
+  return out;
 }
 
 /** One listed practice, for "this is my practice" on the account page. */

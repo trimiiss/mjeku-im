@@ -55,7 +55,6 @@ export function Header() {
 
   return (
     <>
-      <p className="demo-banner">{t.demoBanner}</p>
       <header className="site-header">
         <div className="container header-inner">
           <Link href={paths.home} className="brand" aria-label={t.nav.home}>

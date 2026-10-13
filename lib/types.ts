@@ -39,9 +39,9 @@ export type Practitioner = {
   years_experience: number | null;
   accepts_new_patients: boolean;
   featured: boolean;
-  /** Created by the practitioner through their account (missing in the offline demo data). */
+  /** Created by the practitioner through their account. */
   self_registered?: boolean;
-  /** Checked by Mjeku.Im. Only meaningful for self-registered profiles. */
+  /** Checked by Mjeku.Im. */
   verified?: boolean;
 };
 
@@ -115,7 +115,7 @@ export type BookingError =
   | "unknown";
 
 export type BookingResult =
-  | { ok: true; code: string; startsAt: string; practitionerId: string; mode: Mode; offline: boolean }
+  | { ok: true; code: string; startsAt: string; practitionerId: string; mode: Mode }
   | { ok: false; error: BookingError };
 
 export type FoundBooking = {

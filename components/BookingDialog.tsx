@@ -152,7 +152,7 @@ export function BookingDialog() {
               <p className="code-label">{b.codeLabel}</p>
               <p className="code">{result.code}</p>
               <p className="muted">{b.keepCode}</p>
-              <p className="demo-note">{result.offline ? b.offlineNote : b.demoNote}</p>
+              <p className="booking-note">{b.sentNote}</p>
               <div className="dialog-actions">
                 <a
                   className="btn btn-outline"
@@ -266,7 +266,6 @@ export function BookingDialog() {
               <button type="submit" className="btn btn-primary btn-block" disabled={pending}>
                 {pending ? b.submitting : b.submit}
               </button>
-              <p className="demo-note">{b.demoNote}</p>
             </form>
           )}
         </div>

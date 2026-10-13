@@ -878,6 +878,32 @@ ol {
   box-shadow: var(--shadow);
 }
 
+.join-card {
+  align-self: center;
+  gap: 12px;
+}
+
+.join-title {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.join-text {
+  margin: 0;
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+.join-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+  margin-top: 4px;
+}
+
 .doc-head {
   display: flex;
   align-items: center;

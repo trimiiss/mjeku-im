@@ -42,8 +42,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     openGraph: { title, description, type: "profile", locale: lang === "en" ? "en_GB" : "sq_XK" },
-    // The demo practitioners are fictional, so keep their pages out of search engines.
-    robots: { index: false, follow: true },
+    // Profiles nobody has checked yet stay out of search engines.
+    ...(p.verified ? {} : { robots: { index: false, follow: true } }),
   };
 }
 

@@ -164,7 +164,7 @@ const sq = {
   specialtiesPage: {
     title: "Të gjitha specialitetet",
     lede: "Zgjidh specialitetin për të parë mjekët, terminet e lira dhe çmimet në gjithë Kosovën.",
-    count: (n: number) => (n === 1 ? "1 profesionist" : `${n} profesionistë`),
+    count: (n: number) => (n === 1 ? "1 mjek ose klinikë" : `${n} mjekë dhe klinika`),
     cities: (n: number) => (n === 1 ? "në 1 qytet" : `në ${n} qytete`),
     services: "Të gjitha shërbimet",
     institutions: "Të gjitha institucionet",
@@ -180,7 +180,7 @@ const sq = {
     ],
     faqTitle: "Pyetje nga mjekët",
     faq: [
-      { q: "Sa kushton Mjeku.Im Pro?", a: "Gjatë fazës demo është falas. Çmimet për klinikat do të publikohen para lansimit." },
+      { q: "Sa kushton Mjeku.Im Pro?", a: "Tani për tani është falas." },
       {
         q: "Klinika ime është tashmë në listë. Çfarë bëj?",
         a: "Te lista e qytetit tënd kliko “Kjo është klinika ime” dhe krijo llogarinë: të dhënat plotësohen vetë. Pasi e verifikojmë, profili yt zë vendin e saj në listë.",
@@ -328,7 +328,7 @@ const en: PagesDict = {
   specialtiesPage: {
     title: "All specialties",
     lede: "Choose a specialty to see doctors, free slots and prices across Kosovo.",
-    count: (n: number) => (n === 1 ? "1 professional" : `${n} professionals`),
+    count: (n: number) => (n === 1 ? "1 doctor or practice" : `${n} doctors and practices`),
     cities: (n: number) => (n === 1 ? "in 1 city" : `in ${n} cities`),
     services: "All expertises",
     institutions: "All institutions",
@@ -344,7 +344,7 @@ const en: PagesDict = {
     ],
     faqTitle: "Questions from practitioners",
     faq: [
-      { q: "How much does Mjeku.Im Pro cost?", a: "It is free during the demo phase. Prices for practices will be published before launch." },
+      { q: "How much does Mjeku.Im Pro cost?", a: "It's free for now." },
       {
         q: "My practice is already listed. What do I do?",
         a: "In your town's list, click “This is my practice” and create your account: the details are filled in for you. Once we verify you, your profile takes its place in the list.",

@@ -6,8 +6,6 @@ const sq = {
     description:
       "Gjej mjekë, stomatologë dhe terapistë në Kosovë, shiko terminet e lira dhe rezervo online për një minutë.",
   },
-  demoBanner:
-    "Version demo: mjekët dhe klinikat janë të dhëna shembull dhe rezervimet nuk janë termine të vërteta.",
   nav: {
     home: "Mjeku.Im, faqja kryesore",
     search: "Kërko",
@@ -30,7 +28,7 @@ const sq = {
     inPerson: "Në klinikë",
     minutes: (m: number) => `rreth ${m} min`,
     soonTitle: (what: string) => `${what}: së shpejti`,
-    soonBody: "Kjo pjesë nuk është ende në versionin demo.",
+    soonBody: "Kjo pjesë nuk është ende gati.",
   },
   hero: {
     titleStart: "Rezervo terminin te mjeku",
@@ -66,6 +64,13 @@ const sq = {
     hint: "Zgjidh orën për të rezervuar. Falas për pacientët.",
     continue: "Vazhdo",
     dayTabs: "Dita",
+  },
+  joinCard: {
+    eyebrow: "Për mjekët dhe klinikat",
+    title: "Mjeku.Im sapo nisi",
+    text: "Je mjek, stomatolog ose terapist? Krijo profilin falas, vendos orarin dhe pacientët rezervojnë online direkt te ti.",
+    cta: "Krijo llogari falas",
+    more: "Si funksionon",
   },
   features: {
     title: "Pse të rezervosh online",
@@ -291,8 +296,7 @@ const sq = {
     codeLabel: "Kodi i rezervimit",
     keepCode: "Ruaje këtë kod. Me të dhe me numrin e telefonit mund ta shohësh ose ta anulosh terminin.",
     addToCalendar: "Shto në kalendar",
-    demoNote: "Version demo: klinika nuk njoftohet dhe termini nuk është i vërtetë.",
-    offlineNote: "Pa lidhje me bazën e të dhënave: ky rezervim nuk u ruajt.",
+    sentNote: "Rezervimi shfaqet menjëherë në llogarinë e mjekut në Mjeku.Im. Nëse diçka ndryshon, mund të të telefonojnë në numrin që dhe.",
     done: "Mbyll",
     price: "Çmimi",
     calendarTitle: (who: string) => `Termin te ${who}`,
@@ -339,7 +343,6 @@ const en: Dict = {
     title: "Mjeku.Im | Book a doctor in Kosovo",
     description: "Find doctors, dentists and therapists in Kosovo, see their free slots and book online in a minute.",
   },
-  demoBanner: "Demo version: doctors and clinics are sample data, and bookings are not real appointments.",
   nav: {
     home: "Mjeku.Im home",
     search: "Search",
@@ -362,7 +365,7 @@ const en: Dict = {
     inPerson: "At the clinic",
     minutes: (m: number) => `about ${m} min`,
     soonTitle: (what: string) => `${what}: coming soon`,
-    soonBody: "This part isn't in the demo yet.",
+    soonBody: "This part isn't ready yet.",
   },
   hero: {
     titleStart: "Book a doctor's appointment",
@@ -398,6 +401,13 @@ const en: Dict = {
     hint: "Pick a time to book. Free for patients.",
     continue: "Continue",
     dayTabs: "Day",
+  },
+  joinCard: {
+    eyebrow: "For doctors and practices",
+    title: "Mjeku.Im has just launched",
+    text: "Are you a doctor, dentist or therapist? Create your free profile, set your hours, and patients book online with you directly.",
+    cta: "Create a free account",
+    more: "How it works",
   },
   features: {
     title: "Why book online",
@@ -616,8 +626,7 @@ const en: Dict = {
     codeLabel: "Booking code",
     keepCode: "Keep this code. With it and your phone number you can view or cancel the appointment.",
     addToCalendar: "Add to calendar",
-    demoNote: "Demo version: the clinic isn't notified and this isn't a real appointment.",
-    offlineNote: "Not connected to the database: this booking wasn't saved.",
+    sentNote: "Your booking shows up right away in the doctor's Mjeku.Im account. If anything changes, they may call you on the number you gave.",
     done: "Close",
     price: "Price",
     calendarTitle: (who: string) => `Appointment with ${who}`,

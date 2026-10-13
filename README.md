@@ -4,7 +4,7 @@ Book a doctor, dentist or therapist in Kosovo, at the clinic or by video. Albani
 
 Live: https://mjeku-im.vercel.app
 
-> Demo: the bookable doctors and clinics are fictional sample data, and bookings are not real appointments. The site says so in a banner at the top. The "More in <town>" lists are real practices (see below), and doctors who sign up themselves are real accounts.
+> All data is real: bookable doctors are the ones who sign up through `/llogaria`, and the "More in <town>" lists are real practices (see below). The fictional demo doctors were removed in October 2026.
 
 ## Stack
 
@@ -25,11 +25,12 @@ Live: https://mjeku-im.vercel.app
 - "Rezervimi im / My booking" finds a booking by code + phone number and can cancel it up to 2 hours before.
 - Bookings are never readable through the API. The website only calls three database functions: `book_slot`, `find_booking` and `cancel_booking` (see `app/actions.ts`).
 - A nightly job (pg_cron, 01:10 UTC) creates slots 3 weeks ahead from each doctor's opening hours.
-- Every doctor has a profile page at `/mjeku/<id>` (e.g. `/mjeku/arta-krasniqi`): summary, map and opening hours, presentation, FAQ, and a booking box with specialty, visit reason and 16 days of free times. The visit reason is saved with the booking.
+- Every doctor has a profile page at `/mjeku/<id>` (made from their name, e.g. `/mjeku/arben-gashi`): summary, map and opening hours, presentation, FAQ, and a booking box with specialty, visit reason and 16 days of free times. The visit reason is saved with the booking.
 - Filters are kept in the address (e.g. `/mjek-i-familjes?gjuha=de&gjinia=f`), so a filtered list can be shared.
 - Every specialty page has a page for each of Kosovo's 38 municipalities. Below the bookable doctors, "Të tjerë në <qyteti> / More in <town>" lists the real practices, clinics and health centres there that aren't on Mjeku.Im yet, with phone, address and map, filterable by neighbourhood or village. `/stomatolog` lists every municipality with its count.
 - Doctors can create an account at `/llogaria` (Supabase Auth, email and password), fill in their profile, practice and opening hours, and appear on the site straight away with a "not verified yet" note. Free slots are created for the next 3 weeks from their hours, and they see their bookings (patient name and phone) in the account. "Kjo është klinika ime / This is my practice" on a listed practice opens the sign-up with its details filled in.
-- Without Supabase environment variables, the site runs on the same demo data from `lib/seed.json`, and bookings aren't saved.
+- Until a doctor signs up, the home page invites doctors to join in place of the "next free appointments" card.
+- Without Supabase environment variables (or if the database fails), the site shows the municipalities and specialties from `lib/seed.json` and the practices from `lib/listed.json`, with no bookable doctors.
 
 ## Run it locally
 
@@ -48,7 +49,7 @@ Open http://localhost:3000.
 | All text, Albanian and English | `lib/i18n.ts` (home, header, footer), `lib/pagesText.ts` (listing and info pages), `lib/profileText.ts` (profile pages) |
 | Page addresses (Albanian slugs) | `lib/routes.ts` |
 | Listing filters, sorting and titles | `lib/listing.ts` |
-| Demo doctors, clinics, cities, opening hours | `lib/seed.json` |
+| Municipalities and specialties | `lib/seed.json` |
 | Real practices not on Mjeku.Im yet | `lib/listed.json` (→ `supabase/listed.sql`) |
 | Practitioner account page | `app/llogaria/`, `components/account/`, `lib/accountText.ts` |
 | Services, institution types, popular searches | `lib/taxonomy.ts` |
@@ -61,7 +62,7 @@ Open http://localhost:3000.
 | Specialties, practitioners and help pages | `app/specialitetet/`, `app/per-mjeket/`, `app/ndihme/`, `components/pages/` |
 | Styles | `app/globals.css`, `app/booking.css`, `app/profile.css`, `app/pages.css` |
 | Database schema and functions | `supabase/migrations/` |
-| Demo data SQL (generated) | `supabase/seed.sql` |
+| Municipalities and specialties SQL (generated) | `supabase/seed.sql` |
 
 ## Database
 
@@ -73,9 +74,9 @@ Supabase project `mjeku-im` (ref `xulrcmxkpbxpsnmrpsjw`, region eu-central-1).
 - First free slot per doctor, for the availability filter: `supabase/migrations/20260924190000_next_free_slots.sql`
 - All 38 municipalities and the real-practice listings: `supabase/migrations/20261012120000_listed_practices.sql`
 - Practitioner accounts (`accounts` table, `my_profile`, `save_my_profile`, `my_bookings`): `supabase/migrations/20261012120100_practitioner_accounts.sql`
-- Demo data: edit `lib/seed.json`, run `node scripts/make-seed-sql.mjs`, then run `supabase/seed.sql`
+- Municipalities and specialties: edit `lib/seed.json`, run `node scripts/make-seed-sql.mjs`, then run `supabase/seed.sql`
 
-The demo job marks about 30% of new slots as taken so calendars look realistic. Self-registered doctors never get these fake bookings.
+The nightly job runs `generate_slots(21, 0)`: free slots only, none marked as taken.
 
 ### Real practices ("More in <town>")
 
@@ -93,7 +94,7 @@ The demo job marks about 30% of new slots as taken so calendars look realistic. 
 - Send confirmations and reminders by SMS or email (e.g. Twilio, Resend).
 - Check doctors' licences before verifying them, and let a practice manage more than one doctor from one account.
 - Add a privacy policy and terms, and review them against Law No. 06/L-082 on the Protection of Personal Data.
-- Profile and listing pages are marked `noindex` because the demo doctors are fictional. Remove `robots` in `app/mjeku/[id]/page.tsx` and `components/results/ListingPage.tsx` once the demo doctors are gone.
+- Doctor profiles stay `noindex` until they're verified (`app/mjeku/[id]/page.tsx`); listing pages are indexed.
 - Add real photos (`practitioners.photo_url` is ready) and the practices' phone numbers.
 
 ## Push to GitHub

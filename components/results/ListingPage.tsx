@@ -40,7 +40,5 @@ export function listingMetadata(base: Base, lang: Lang, specialty?: Specialty, c
     title,
     description,
     openGraph: { title, description, type: "website", locale: lang === "en" ? "en_GB" : "sq_XK" },
-    // The demo practitioners are fictional, so keep these pages out of search engines for now.
-    robots: { index: false, follow: true },
   };
 }
